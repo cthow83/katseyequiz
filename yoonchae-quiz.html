@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yoonchae Quiz!</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    min-height: 100vh;
+    background: #fff8fe;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 28px 16px 60px;
+    overflow-x: hidden;
+  }
+
+  .rainbow-bar {
+    width: 100%;
+    height: 7px;
+    background: linear-gradient(90deg, #ff6b6b, #ffa94d, #ffe066, #69db7c, #4dabf7, #9775fa, #f783ac);
+    position: fixed;
+    top: 0; left: 0;
+    z-index: 100;
+    border-radius: 0 0 4px 4px;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 28px;
+    margin-top: 12px;
+    animation: popIn 0.55s cubic-bezier(0.34,1.56,0.64,1) both;
+  }
+
+  .title {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(2rem, 7vw, 3.2rem);
+    background: linear-gradient(135deg, #ff6b6b, #ffa94d, #ffe066, #69db7c, #4dabf7, #9775fa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.1;
+    filter: drop-shadow(0 2px 0 rgba(0,0,0,0.08));
+  }
+
+  .subtitle {
+    font-size: 1rem;
+    color: #9775fa;
+    font-weight: 700;
+    margin-top: 6px;
+    letter-spacing: 0.5px;
+  }
+
+  .emoji-row {
+    font-size: 1.6rem;
+    margin-top: 8px;
+    letter-spacing: 6px;
+    animation: wiggle 2s ease-in-out infinite;
+  }
+
+  .card {
+    background: #ffffff;
+    border-radius: 24px;
+    padding: 28px 28px 24px;
+    width: 100%;
+    max-width: 560px;
+    box-shadow: 0 8px 40px rgba(151,117,250,0.13), 0 2px 8px rgba(0,0,0,0.05);
+    border: 2px solid #f3f0ff;
+    animation: slideUp 0.45s cubic-bezier(0.34,1.2,0.64,1) both;
+  }
+
+  .top-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+    gap: 10px;
+  }
+
+  .q-label {
+    font-size: 13px;
+    font-weight: 800;
+    color: #9775fa;
+    white-space: nowrap;
+  }
+
+  .score-pill {
+    font-size: 13px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #f3f0ff, #fce4ec);
+    border: 1.5px solid #e9d5ff;
+    border-radius: 99px;
+    padding: 4px 14px;
+    color: #7048e8;
+    white-space: nowrap;
+  }
+
+  .progress-track {
+    flex: 1;
+    height: 9px;
+    background: #f3f0ff;
+    border-radius: 99px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #ff6b6b, #ffa94d, #ffe066, #69db7c, #4dabf7, #9775fa);
+    border-radius: 99px;
+    transition: width 0.5s cubic-bezier(0.34,1.2,0.64,1);
+    width: 0%;
+  }
+
+  .question-text {
+    font-size: clamp(1.05rem, 3vw, 1.2rem);
+    font-weight: 800;
+    color: #2d2040;
+    line-height: 1.5;
+    margin-bottom: 20px;
+  }
+
+  .answers {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 11px;
+    margin-bottom: 18px;
+  }
+
+  .ans-btn {
+    border-radius: 14px;
+    padding: 14px 12px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 14px;
+    font-weight: 800;
+    cursor: pointer;
+    text-align: center;
+    line-height: 1.3;
+    transition: transform 0.13s, box-shadow 0.13s;
+    border: 2.5px solid transparent;
+  }
+
+  .ans-btn:nth-child(1) { background: #fff0f0; border-color: #ffc9c9; color: #c92a2a; }
+  .ans-btn:nth-child(2) { background: #fff8e1; border-color: #ffe066; color: #9a6700; }
+  .ans-btn:nth-child(3) { background: #f0fff4; border-color: #b2f2bb; color: #2b7a3a; }
+  .ans-btn:nth-child(4) { background: #f3f0ff; border-color: #d0bfff; color: #5f3dc4; }
+
+  .ans-btn:hover:not(:disabled) {
+    transform: translateY(-3px) scale(1.03);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+  }
+
+  .ans-btn:active:not(:disabled) { transform: scale(0.97); }
+
+  .ans-btn.correct {
+    background: #ebfbee !important;
+    border-color: #40c057 !important;
+    color: #1a6b2a !important;
+    animation: correctPop 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
+  }
+
+  .ans-btn.wrong {
+    background: #fff5f5 !important;
+    border-color: #ff6b6b !important;
+    color: #c92a2a !important;
+    animation: shake 0.35s ease both;
+  }
+
+  .ans-btn:disabled { cursor: default; }
+
+  .feedback {
+    min-height: 34px;
+    font-size: 15px;
+    font-weight: 800;
+    text-align: center;
+    border-radius: 12px;
+    padding: 7px 14px;
+    margin-bottom: 14px;
+  }
+
+  .feedback.good { background: #ebfbee; color: #2b8a3e; }
+  .feedback.bad  { background: #fff5f5; color: #c92a2a; }
+
+  .next-btn {
+    display: none;
+    width: 100%;
+    background: linear-gradient(135deg, #9775fa, #748ffc);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    padding: 15px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 16px;
+    font-weight: 800;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    transition: transform 0.13s, box-shadow 0.13s;
+    box-shadow: 0 4px 16px rgba(151,117,250,0.35);
+  }
+
+  .next-btn:hover { transform: translateY(-2px); box-shadow: 0 7px 20px rgba(151,117,250,0.4); }
+  .next-btn:active { transform: scale(0.98); }
+
+  .end-screen {
+    display: none;
+    text-align: center;
+    padding: 8px 0 4px;
+    animation: popIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
+  }
+
+  .stars {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+    letter-spacing: 5px;
+  }
+
+  .end-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 2rem;
+    background: linear-gradient(135deg, #ff6b6b, #9775fa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 6px;
+  }
+
+  .end-score {
+    font-size: 3.8rem;
+    font-weight: 900;
+    color: #7048e8;
+    line-height: 1;
+    margin-bottom: 10px;
+  }
+
+  .end-msg {
+    font-size: 1rem;
+    color: #6c4ab3;
+    font-weight: 700;
+    margin-bottom: 24px;
+    line-height: 1.5;
+  }
+
+  .restart-btn {
+    background: linear-gradient(135deg, #ff6b6b, #ffa94d, #ffe066, #69db7c, #4dabf7, #9775fa);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    padding: 15px 36px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 16px;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(151,117,250,0.35);
+    transition: transform 0.13s, box-shadow 0.13s;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.15);
+  }
+
+  .restart-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(151,117,250,0.45); }
+
+  .floaties {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: -1;
+  }
+
+  .floaty {
+    position: absolute;
+    font-size: 2.5rem;
+    opacity: 0.12;
+    animation: floatUp 8s ease-in-out infinite;
+    user-select: none;
+  }
+
+  @keyframes floatUp {
+    0%, 100% { transform: translateY(0) rotate(-8deg); }
+    50% { transform: translateY(-22px) rotate(8deg); }
+  }
+
+  @keyframes popIn {
+    from { opacity: 0; transform: scale(0.8); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes correctPop {
+    0%   { transform: scale(1); }
+    50%  { transform: scale(1.07); }
+    100% { transform: scale(1); }
+  }
+
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25%  { transform: translateX(-6px); }
+    75%  { transform: translateX(6px); }
+  }
+
+  @keyframes wiggle {
+    0%, 100% { transform: rotate(-3deg); }
+    50% { transform: rotate(3deg); }
+  }
+
+  @media (max-width: 400px) {
+    .answers { grid-template-columns: 1fr; }
+    .card { padding: 18px 14px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="rainbow-bar"></div>
+
+<div class="floaties">
+  <div class="floaty" style="left:4%; top:12%; animation-delay:0s">🌈</div>
+  <div class="floaty" style="left:88%; top:8%; animation-delay:1.5s">⭐</div>
+  <div class="floaty" style="left:6%; top:60%; animation-delay:3s">🎵</div>
+  <div class="floaty" style="left:85%; top:55%; animation-delay:2s">🐚</div>
+  <div class="floaty" style="left:50%; top:5%; animation-delay:4s">💜</div>
+  <div class="floaty" style="left:20%; top:80%; animation-delay:1s">🌟</div>
+  <div class="floaty" style="left:75%; top:80%; animation-delay:2.5s">🎤</div>
+</div>
+
+<header>
+  <div class="title">Yoonchae Quiz!</div>
+  <div class="subtitle">How well do you know KATSEYE's youngest?</div>
+  <div class="emoji-row">🐚🌈⭐🌈🐚</div>
+</header>
+
+<div class="card" id="quiz-card">
+  <div id="game-area">
+    <div class="top-row">
+      <span class="q-label" id="q-counter">Question 1 of 10</span>
+      <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+      <span class="score-pill">Score: <span id="score-num">0</span></span>
+    </div>
+
+    <p class="question-text" id="question-text"></p>
+    <div class="answers" id="answers"></div>
+    <div class="feedback" id="feedback"></div>
+    <button class="next-btn" id="next-btn">Next question →</button>
+  </div>
+
+  <div class="end-screen" id="end-screen">
+    <div class="stars" id="stars"></div>
+    <div class="end-title" id="end-title"></div>
+    <div class="end-score" id="end-score"></div>
+    <div class="end-msg" id="end-msg"></div>
+    <button class="restart-btn" id="restart-btn">Play again! 🌈</button>
+  </div>
+</div>
+
+<script>
+const questions = [
+  {
+    q: "Where was Yoonchae born?",
+    answers: ["Busan", "Seoul", "Los Angeles", "Tokyo"],
+    correct: 1
+  },
+  {
+    q: "What is Yoonchae's position in KATSEYE?",
+    answers: ["Leader", "Main vocalist", "Maknae (youngest)", "Visual"],
+    correct: 2
+  },
+  {
+    q: "What is Yoonchae's birthday?",
+    answers: ["March 3", "July 14", "December 6", "September 21"],
+    correct: 2
+  },
+  {
+    q: "Which K-pop group inspired Yoonchae to pursue K-pop?",
+    answers: ["TWICE", "BTS", "BLACKPINK", "aespa"],
+    correct: 1
+  },
+  {
+    q: "What is one of Yoonchae's cute nicknames?",
+    answers: ["Bunny", "Marshmallow", "Cookie", "Starfish"],
+    correct: 1
+  },
+  {
+    q: "What place did Yoonchae finish on The Debut: Dream Academy?",
+    answers: ["1st", "2nd", "3rd", "4th"],
+    correct: 3
+  },
+  {
+    q: "What is Yoonchae's dream charm called?",
+    answers: ["Golden Star", "Soothing Shell", "Rainbow Crystal", "Lucky Petal"],
+    correct: 1
+  },
+  {
+    q: "Who is one of Yoonchae's role models?",
+    answers: ["Rosé", "Lisa", "Jennie", "Jisoo"],
+    correct: 2
+  },
+  {
+    q: "Which member shares a dorm room with Yoonchae?",
+    answers: ["Lara", "Megan", "Sophia", "Daniela"],
+    correct: 2
+  },
+  {
+    q: "How tall is Yoonchae?",
+    answers: ["160cm", "165cm", "168cm", "170cm"],
+    correct: 3
+  }
+];
+
+let current = 0, score = 0, answered = false, order = [];
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function startQuiz() {
+  order = shuffle([...Array(questions.length).keys()]);
+  current = 0; score = 0; answered = false;
+  document.getElementById('end-screen').style.display = 'none';
+  document.getElementById('game-area').style.display = 'block';
+  document.getElementById('feedback').textContent = '';
+  document.getElementById('feedback').className = 'feedback';
+  document.getElementById('next-btn').style.display = 'none';
+  document.getElementById('score-num').textContent = '0';
+  document.getElementById('progress-fill').style.width = '0%';
+  loadQuestion();
+}
+
+function loadQuestion() {
+  answered = false;
+  const q = questions[order[current]];
+  document.getElementById('question-text').textContent = q.q;
+  document.getElementById('q-counter').textContent = `Question ${current + 1} of ${questions.length}`;
+  document.getElementById('progress-fill').style.width = `${(current / questions.length) * 100}%`;
+  document.getElementById('feedback').textContent = '';
+  document.getElementById('feedback').className = 'feedback';
+  document.getElementById('next-btn').style.display = 'none';
+
+  const answersDiv = document.getElementById('answers');
+  answersDiv.innerHTML = '';
+  q.answers.forEach((a, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'ans-btn';
+    btn.textContent = a;
+    btn.onclick = () => selectAnswer(i);
+    answersDiv.appendChild(btn);
+  });
+}
+
+function selectAnswer(chosen) {
+  if (answered) return;
+  answered = true;
+  const q = questions[order[current]];
+  const correct = q.correct;
+  const btns = document.querySelectorAll('.ans-btn');
+  btns.forEach(b => b.disabled = true);
+  btns[correct].classList.add('correct');
+
+  const fb = document.getElementById('feedback');
+  if (chosen === correct) {
+    score++;
+    document.getElementById('score-num').textContent = score;
+    const cheers = ["Amazing! 🌈", "Brilliant! ⭐", "You got it! 🐚", "Superstar! 💜", "Correct! 🎵"];
+    fb.textContent = cheers[Math.floor(Math.random() * cheers.length)];
+    fb.className = 'feedback good';
+  } else {
+    btns[chosen].classList.add('wrong');
+    fb.textContent = `Not quite! The right answer is: ${q.answers[correct]}`;
+    fb.className = 'feedback bad';
+  }
+
+  if (current < questions.length - 1) {
+    document.getElementById('next-btn').style.display = 'block';
+  } else {
+    document.getElementById('progress-fill').style.width = '100%';
+    setTimeout(showEnd, 1300);
+  }
+}
+
+function showEnd() {
+  document.getElementById('game-area').style.display = 'none';
+  const pct = score / questions.length;
+  const numStars = pct >= 0.9 ? 5 : pct >= 0.7 ? 4 : pct >= 0.5 ? 3 : pct >= 0.3 ? 2 : 1;
+  const starEmojis = ['🌟','⭐','💛','🧡','❤️'];
+  document.getElementById('stars').textContent = starEmojis.slice(0, numStars).join(' ');
+  document.getElementById('end-title').textContent = score === 10 ? "Perfect score!" : "Quiz done!";
+  document.getElementById('end-score').textContent = `${score} / ${questions.length}`;
+  document.getElementById('end-msg').textContent =
+    score === 10 ? "You're Yoonchae's biggest fan! You know EVERYTHING! 🐚🌈" :
+    score >= 7  ? "Wow, you really know your Yoonchae facts! Amazing! 🌟" :
+    score >= 5  ? "Great job! You know loads about her! 💜" :
+    score >= 3  ? "Good try! Play again and beat your score! ⭐" :
+                  "Keep learning about Yoonchae and try again! 🌈";
+  document.getElementById('end-screen').style.display = 'block';
+}
+
+document.getElementById('next-btn').onclick = () => { current++; loadQuestion(); };
+document.getElementById('restart-btn').onclick = startQuiz;
+
+startQuiz();
+</script>
+</body>
+</html>

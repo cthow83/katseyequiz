@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ellie's Games! 🎮</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    min-height: 100vh;
+    background: #0d0d1a;
+    background-image:
+      radial-gradient(ellipse at 15% 20%, #1a0533 0%, transparent 45%),
+      radial-gradient(ellipse at 85% 80%, #001a2d 0%, transparent 45%),
+      radial-gradient(ellipse at 50% 50%, #0d001a 0%, transparent 60%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 32px 16px 60px;
+    overflow-x: hidden;
+  }
+
+  .stars-bg {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+  }
+
+  .star {
+    position: absolute;
+    background: white;
+    border-radius: 50%;
+    opacity: 0;
+    animation: twinkle 3s ease-in-out infinite;
+  }
+
+  @keyframes twinkle {
+    0%, 100% { opacity: 0; transform: scale(0.5); }
+    50% { opacity: 0.5; transform: scale(1); }
+  }
+
+  header {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    margin-bottom: 12px;
+    animation: popIn 0.6s cubic-bezier(0.34,1.56,0.64,1) both;
+  }
+
+  .title {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(2.8rem, 9vw, 5rem);
+    background: linear-gradient(135deg, #ff6b6b, #ffa94d, #ffe066, #69db7c, #4dabf7, #cc5de8, #f783ac);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.1;
+    filter: drop-shadow(0 3px 0 rgba(0,0,0,0.2));
+    letter-spacing: 1px;
+  }
+
+  .crown {
+    font-size: clamp(2rem, 6vw, 3.5rem);
+    display: block;
+    margin-bottom: 6px;
+    animation: float 3s ease-in-out infinite;
+  }
+
+  .subtitle {
+    font-size: 1rem;
+    color: #c084fc;
+    font-weight: 700;
+    margin-top: 8px;
+    letter-spacing: 0.5px;
+  }
+
+  .rainbow-strip {
+    width: 100%;
+    max-width: 600px;
+    height: 5px;
+    background: linear-gradient(90deg, #ff6b6b, #ffa94d, #ffe066, #69db7c, #4dabf7, #cc5de8, #f783ac);
+    border-radius: 99px;
+    margin: 20px 0 36px;
+    position: relative;
+    z-index: 1;
+    opacity: 0.7;
+  }
+
+  .games-grid {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 20px;
+    width: 100%;
+    max-width: 620px;
+    margin-bottom: 40px;
+  }
+
+  .game-card {
+    border-radius: 24px;
+    padding: 28px 24px 24px;
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    transition: transform 0.18s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.18s;
+    animation: slideUp 0.5s cubic-bezier(0.34,1.2,0.64,1) both;
+    border: 2px solid transparent;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .game-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 22px;
+    opacity: 0.08;
+    transition: opacity 0.2s;
+  }
+
+  .game-card:hover { transform: translateY(-6px) scale(1.02); }
+  .game-card:hover::before { opacity: 0.15; }
+  .game-card:active { transform: scale(0.98); }
+
+  .game-card.card-1 {
+    background: linear-gradient(135deg, #1a2a1a, #1e3a1e);
+    border-color: rgba(76,175,80,0.4);
+    box-shadow: 0 8px 32px rgba(76,175,80,0.2);
+    animation-delay: 0.1s;
+  }
+
+  .game-card.card-2 {
+    background: linear-gradient(135deg, #1a0a2a, #2a1040);
+    border-color: rgba(151,117,250,0.4);
+    box-shadow: 0 8px 32px rgba(151,117,250,0.2);
+    animation-delay: 0.2s;
+  }
+
+  .game-card.card-3 {
+    background: linear-gradient(135deg, #1a0811, #2a0d1c);
+    border-color: rgba(236,72,153,0.4);
+    box-shadow: 0 8px 32px rgba(236,72,153,0.2);
+    animation-delay: 0.3s;
+  }
+
+  .game-card.card-4 {
+    background: linear-gradient(135deg, #0a1a2a, #0d2240);
+    border-color: rgba(59,130,246,0.4);
+    box-shadow: 0 8px 32px rgba(59,130,246,0.2);
+    animation-delay: 0.4s;
+  }
+
+  .game-emoji {
+    font-size: 3rem;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .game-name {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.5rem;
+    line-height: 1.1;
+  }
+
+  .card-1 .game-name { color: #86efac; }
+  .card-2 .game-name { color: #d8b4fe; }
+  .card-3 .game-name { color: #fbcfe8; }
+  .card-4 .game-name { color: #bfdbfe; }
+
+  .game-desc {
+    font-size: 0.9rem;
+    font-weight: 700;
+    line-height: 1.5;
+  }
+
+  .card-1 .game-desc { color: #4ade80; opacity: 0.85; }
+  .card-2 .game-desc { color: #c084fc; opacity: 0.85; }
+  .card-3 .game-desc { color: #f472b6; opacity: 0.85; }
+  .card-4 .game-desc { color: #93c5fd; opacity: 0.85; }
+
+  .play-btn {
+    margin-top: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: 99px;
+    padding: 8px 18px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 13px;
+    font-weight: 900;
+    letter-spacing: 0.5px;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.13s;
+  }
+
+  .card-1 .play-btn { background: #22c55e; color: #052e16; }
+  .card-2 .play-btn { background: #a855f7; color: #1e0536; }
+  .card-3 .play-btn { background: #ec4899; color: #1a0011; }
+  .card-4 .play-btn { background: #3b82f6; color: #0c1a3a; }
+
+  .play-btn:hover { transform: scale(1.08); }
+
+  .tag {
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    border-radius: 99px;
+    padding: 3px 10px;
+    margin-bottom: 2px;
+  }
+
+  .card-1 .tag { background: rgba(34,197,94,0.2); color: #4ade80; }
+  .card-2 .tag { background: rgba(168,85,247,0.2); color: #c084fc; }
+  .card-3 .tag { background: rgba(236,72,153,0.2); color: #f472b6; }
+  .card-4 .tag { background: rgba(59,130,246,0.2); color: #93c5fd; }
+
+  footer {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    color: rgba(255,255,255,0.25);
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  footer span {
+    background: linear-gradient(90deg, #ff6b6b, #ffa94d, #ffe066, #69db7c, #4dabf7, #cc5de8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 900;
+  }
+
+  @keyframes popIn {
+    from { opacity: 0; transform: scale(0.8); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0) rotate(-5deg); }
+    50% { transform: translateY(-10px) rotate(5deg); }
+  }
+</style>
+</head>
+<body>
+
+<div class="stars-bg" id="stars-bg"></div>
+
+<header>
+  <span class="crown">👑</span>
+  <div class="title">Ellie's Games!</div>
+  <div class="subtitle">Pick a game and start playing 🎮</div>
+</header>
+
+<div class="rainbow-strip"></div>
+
+<div class="games-grid">
+
+  <a class="game-card card-1" href="katseye-quiz.html">
+    <div class="tag">Quiz</div>
+    <div class="game-emoji">🎵</div>
+    <div class="game-name">KATSEYE Quiz</div>
+    <div class="game-desc">How well do you know the group? Answer 10 questions about KATSEYE!</div>
+    <div class="play-btn">Play now ▶</div>
+  </a>
+
+  <a class="game-card card-2" href="yoonchae-quiz.html">
+    <div class="tag">Quiz</div>
+    <div class="game-emoji">🐚</div>
+    <div class="game-name">Yoonchae Quiz</div>
+    <div class="game-desc">Test your knowledge of KATSEYE's youngest member in rainbow colours!</div>
+    <div class="play-btn">Play now ▶</div>
+  </a>
+
+  <a class="game-card card-3" href="spelling-catch-game.html">
+    <div class="tag">Catching game</div>
+    <div class="game-emoji">🩷</div>
+    <div class="game-name">Spelling Catcher</div>
+    <div class="game-desc">Catch the correctly spelled word as it falls! Watch out for the wrong ones!</div>
+    <div class="play-btn">Play now ▶</div>
+  </a>
+
+  <a class="game-card card-4" href="school-memory-game.html">
+    <div class="tag">Memory game</div>
+    <div class="game-emoji">💜</div>
+    <div class="game-name">School Memory</div>
+    <div class="game-desc">Match questions to answers in Maths, English and Science!</div>
+    <div class="play-btn">Play now ▶</div>
+  </a>
+
+</div>
+
+<footer>Made by <span>Ellie</span> 🌈</footer>
+
+<script>
+  const bg = document.getElementById('stars-bg');
+  for (let i = 0; i < 80; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    const size = Math.random() * 3 + 1;
+    s.style.cssText = `width:${size}px;height:${size}px;left:${Math.random()*100}%;top:${Math.random()*100}%;animation-delay:${Math.random()*5}s;animation-duration:${2+Math.random()*4}s`;
+    bg.appendChild(s);
+  }
+</script>
+</body>
+</html>
