@@ -1,539 +1,633 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Spelling Catcher!</title>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
-<style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spelling Catcher!</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Fredoka+One&display=swap"
+    rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-  body {
-    font-family: 'Nunito', sans-serif;
-    background: #1a0011;
-    background-image:
-      radial-gradient(ellipse at 20% 10%, #3d0025 0%, transparent 50%),
-      radial-gradient(ellipse at 80% 90%, #2d0018 0%, transparent 50%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-height: 100vh;
-    padding: 16px 16px 24px;
-    color: white;
-    overflow-x: hidden;
-    user-select: none;
-  }
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: #1a0011;
+      background-image:
+        radial-gradient(ellipse at 20% 10%, #3d0025 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 90%, #2d0018 0%, transparent 50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 16px 16px 24px;
+      color: white;
+      overflow-x: hidden;
+      user-select: none;
+    }
 
-  header {
-    text-align: center;
-    margin-bottom: 10px;
-    animation: popIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
-  }
+    header {
+      text-align: center;
+      margin-bottom: 10px;
+      animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
 
-  .title {
-    font-family: 'Fredoka One', cursive;
-    font-size: clamp(1.6rem, 5vw, 2.4rem);
-    color: #fbcfe8;
-    text-shadow: 0 0 24px rgba(236,72,153,0.7), 0 2px 0 #831843;
-  }
+    .title {
+      font-family: 'Fredoka One', cursive;
+      font-size: clamp(1.6rem, 5vw, 2.4rem);
+      color: #fbcfe8;
+      text-shadow: 0 0 24px rgba(236, 72, 153, 0.7), 0 2px 0 #831843;
+    }
 
-  .subtitle {
-    font-size: 0.85rem;
-    color: #f472b6;
-    font-weight: 700;
-    margin-top: 2px;
-  }
+    .subtitle {
+      font-size: 0.85rem;
+      color: #f472b6;
+      font-weight: 700;
+      margin-top: 2px;
+    }
 
-  .stats-row {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 10px;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
+    /* Back button */
+    .back-btn {
+      position: fixed;
+      left: 12px;
+      top: 12px;
+      background: rgba(255, 255, 255, 0.06);
+      color: #fbcfe8;
+      padding: 8px 12px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: 800;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      z-index: 220;
+    }
 
-  .stat-pill {
-    background: rgba(190,24,93,0.3);
-    border: 1.5px solid rgba(236,72,153,0.4);
-    border-radius: 99px;
-    padding: 5px 14px;
-    font-size: 13px;
-    font-weight: 800;
-    color: #fbcfe8;
-  }
+    .back-btn:hover {
+      transform: translateY(-2px);
+    }
 
-  .stat-pill span { color: #f472b6; font-weight: 900; }
+    .stats-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
 
-  .word-display {
-    background: rgba(190,24,93,0.2);
-    border: 2px solid rgba(236,72,153,0.4);
-    border-radius: 14px;
-    padding: 10px 20px;
-    margin-bottom: 10px;
-    text-align: center;
-    width: 100%;
-    max-width: 560px;
-  }
+    .stat-pill {
+      background: rgba(190, 24, 93, 0.3);
+      border: 1.5px solid rgba(236, 72, 153, 0.4);
+      border-radius: 99px;
+      padding: 5px 14px;
+      font-size: 13px;
+      font-weight: 800;
+      color: #fbcfe8;
+    }
 
-  .word-label {
-    font-size: 11px;
-    font-weight: 800;
-    color: #f472b6;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    margin-bottom: 4px;
-  }
+    .stat-pill span {
+      color: #f472b6;
+      font-weight: 900;
+    }
 
-  .word-hint {
-    font-size: 1.1rem;
-    font-weight: 900;
-    color: #fbcfe8;
-    font-style: italic;
-  }
+    .word-display {
+      background: rgba(190, 24, 93, 0.2);
+      border: 2px solid rgba(236, 72, 153, 0.4);
+      border-radius: 14px;
+      padding: 10px 20px;
+      margin-bottom: 10px;
+      text-align: center;
+      width: 100%;
+      max-width: 560px;
+    }
 
-  .arena {
-    position: relative;
-    width: 100%;
-    max-width: 560px;
-    height: 300px;
-    background: rgba(190,24,93,0.08);
-    border: 2px solid rgba(236,72,153,0.25);
-    border-radius: 16px;
-    overflow: hidden;
-    margin-bottom: 10px;
-  }
+    .word-label {
+      font-size: 11px;
+      font-weight: 800;
+      color: #f472b6;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
 
-  .falling-word {
-    position: absolute;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: clamp(0.85rem, 2.5vw, 1.05rem);
-    font-weight: 900;
-    color: white;
-    padding: 8px 14px;
-    white-space: nowrap;
-    animation: fall linear forwards;
-    box-shadow: 0 4px 14px rgba(0,0,0,0.3);
-    cursor: default;
-  }
+    .word-hint {
+      font-size: 1.1rem;
+      font-weight: 900;
+      color: #fbcfe8;
+      font-style: italic;
+    }
 
-  .falling-word.c0 { background: linear-gradient(135deg, #16a34a, #22c55e); border: 2px solid #86efac; }
-  .falling-word.c1 { background: linear-gradient(135deg, #d97706, #f59e0b); border: 2px solid #fde68a; }
-  .falling-word.c2 { background: linear-gradient(135deg, #2563eb, #3b82f6); border: 2px solid #93c5fd; }
-  .falling-word.c3 { background: linear-gradient(135deg, #7c3aed, #a855f7); border: 2px solid #d8b4fe; }
-  .falling-word.c4 { background: linear-gradient(135deg, #db2777, #ec4899); border: 2px solid #f9a8d4; }
-  .falling-word.c5 { background: linear-gradient(135deg, #0891b2, #06b6d4); border: 2px solid #67e8f9; }
+    .arena {
+      position: relative;
+      width: 100%;
+      max-width: 560px;
+      height: 300px;
+      background: rgba(190, 24, 93, 0.08);
+      border: 2px solid rgba(236, 72, 153, 0.25);
+      border-radius: 16px;
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
 
-  @keyframes fall {
-    from { top: -60px; }
-    to   { top: 110%; }
-  }
+    .falling-word {
+      position: absolute;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: clamp(0.85rem, 2.5vw, 1.05rem);
+      font-weight: 900;
+      color: white;
+      padding: 8px 14px;
+      white-space: nowrap;
+      animation: fall linear forwards;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+      cursor: default;
+    }
 
-  .catcher {
-    position: absolute;
-    bottom: 10px;
-    height: 22px;
-    width: 110px;
-    background: linear-gradient(135deg, #db2777, #f472b6);
-    border-radius: 99px;
-    border: 2px solid #fbcfe8;
-    box-shadow: 0 0 16px rgba(236,72,153,0.7);
-    transform: translateX(-50%);
-    pointer-events: none;
-  }
+    .falling-word.c0 {
+      background: linear-gradient(135deg, #16a34a, #22c55e);
+      border: 2px solid #86efac;
+    }
 
-  .msg-bar {
-    width: 100%;
-    max-width: 560px;
-    min-height: 32px;
-    font-size: 14px;
-    font-weight: 800;
-    color: #fbcfe8;
-    text-align: center;
-    background: rgba(190,24,93,0.2);
-    border-radius: 10px;
-    padding: 6px 16px;
-    border: 1px solid rgba(236,72,153,0.3);
-    margin-bottom: 10px;
-  }
+    .falling-word.c1 {
+      background: linear-gradient(135deg, #d97706, #f59e0b);
+      border: 2px solid #fde68a;
+    }
 
-  .msg-bar.good { color: #4ade80; }
-  .msg-bar.bad  { color: #fca5a5; }
+    .falling-word.c2 {
+      background: linear-gradient(135deg, #2563eb, #3b82f6);
+      border: 2px solid #93c5fd;
+    }
 
-  .btn-row {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 4px;
-  }
+    .falling-word.c3 {
+      background: linear-gradient(135deg, #7c3aed, #a855f7);
+      border: 2px solid #d8b4fe;
+    }
 
-  .action-btn {
-    background: linear-gradient(135deg, #db2777, #ec4899);
-    color: white;
-    border: none;
-    border-radius: 12px;
-    padding: 11px 26px;
-    font-family: 'Nunito', sans-serif;
-    font-size: 15px;
-    font-weight: 800;
-    cursor: pointer;
-    box-shadow: 0 4px 16px rgba(219,39,119,0.45);
-    transition: transform 0.13s, box-shadow 0.13s;
-  }
+    .falling-word.c4 {
+      background: linear-gradient(135deg, #db2777, #ec4899);
+      border: 2px solid #f9a8d4;
+    }
 
-  .action-btn:hover { transform: translateY(-2px); }
-  .action-btn:active { transform: scale(0.97); }
+    .falling-word.c5 {
+      background: linear-gradient(135deg, #0891b2, #06b6d4);
+      border: 2px solid #67e8f9;
+    }
 
-  .controls-hint {
-    font-size: 12px;
-    color: #f472b6;
-    font-weight: 700;
-    opacity: 0.7;
-    text-align: center;
-  }
+    @keyframes fall {
+      from {
+        top: -60px;
+      }
 
-  .overlay {
-    display: none;
-    position: absolute;
-    inset: 0;
-    background: rgba(0,0,0,0.78);
-    border-radius: 14px;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    gap: 12px;
-    z-index: 10;
-    text-align: center;
-    padding: 24px;
-  }
+      to {
+        top: 110%;
+      }
+    }
 
-  .overlay.show { display: flex; }
+    .catcher {
+      position: absolute;
+      bottom: 10px;
+      height: 22px;
+      width: 110px;
+      background: linear-gradient(135deg, #db2777, #f472b6);
+      border-radius: 99px;
+      border: 2px solid #fbcfe8;
+      box-shadow: 0 0 16px rgba(236, 72, 153, 0.7);
+      transform: translateX(-50%);
+      pointer-events: none;
+    }
 
-  .overlay-title {
-    font-family: 'Fredoka One', cursive;
-    font-size: 2rem;
-    color: #fbcfe8;
-    text-shadow: 0 0 20px rgba(236,72,153,0.8);
-    line-height: 1.2;
-  }
+    .msg-bar {
+      width: 100%;
+      max-width: 560px;
+      min-height: 32px;
+      font-size: 14px;
+      font-weight: 800;
+      color: #fbcfe8;
+      text-align: center;
+      background: rgba(190, 24, 93, 0.2);
+      border-radius: 10px;
+      padding: 6px 16px;
+      border: 1px solid rgba(236, 72, 153, 0.3);
+      margin-bottom: 10px;
+    }
 
-  .overlay-sub {
-    font-size: 0.95rem;
-    font-weight: 800;
-    color: #f472b6;
-    line-height: 1.6;
-  }
+    .msg-bar.good {
+      color: #4ade80;
+    }
 
-  .overlay-btn {
-    background: linear-gradient(135deg, #db2777, #ec4899);
-    color: white;
-    border: none;
-    border-radius: 10px;
-    padding: 10px 24px;
-    font-family: 'Nunito', sans-serif;
-    font-size: 14px;
-    font-weight: 800;
-    cursor: pointer;
-    box-shadow: 0 4px 14px rgba(219,39,119,0.4);
-  }
+    .msg-bar.bad {
+      color: #fca5a5;
+    }
 
-  @keyframes popIn {
-    from { opacity: 0; transform: scale(0.8); }
-    to   { opacity: 1; transform: scale(1); }
-  }
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 4px;
+    }
 
-  @keyframes flashGood {
-    0%, 100% { background: rgba(190,24,93,0.08); }
-    50% { background: rgba(74,222,128,0.15); }
-  }
+    .action-btn {
+      background: linear-gradient(135deg, #db2777, #ec4899);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 11px 26px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 15px;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(219, 39, 119, 0.45);
+      transition: transform 0.13s, box-shadow 0.13s;
+    }
 
-  @keyframes flashBad {
-    0%, 100% { background: rgba(190,24,93,0.08); }
-    50% { background: rgba(236,72,153,0.25); }
-  }
-</style>
+    .action-btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .action-btn:active {
+      transform: scale(0.97);
+    }
+
+    .controls-hint {
+      font-size: 12px;
+      color: #f472b6;
+      font-weight: 700;
+      opacity: 0.7;
+      text-align: center;
+    }
+
+    .overlay {
+      display: none;
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.78);
+      border-radius: 14px;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 12px;
+      z-index: 10;
+      text-align: center;
+      padding: 24px;
+    }
+
+    .overlay.show {
+      display: flex;
+    }
+
+    .overlay-title {
+      font-family: 'Fredoka One', cursive;
+      font-size: 2rem;
+      color: #fbcfe8;
+      text-shadow: 0 0 20px rgba(236, 72, 153, 0.8);
+      line-height: 1.2;
+    }
+
+    .overlay-sub {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: #f472b6;
+      line-height: 1.6;
+    }
+
+    .overlay-btn {
+      background: linear-gradient(135deg, #db2777, #ec4899);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 10px 24px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(219, 39, 119, 0.4);
+    }
+
+    @keyframes popIn {
+      from {
+        opacity: 0;
+        transform: scale(0.8);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    @keyframes flashGood {
+
+      0%,
+      100% {
+        background: rgba(190, 24, 93, 0.08);
+      }
+
+      50% {
+        background: rgba(74, 222, 128, 0.15);
+      }
+    }
+
+    @keyframes flashBad {
+
+      0%,
+      100% {
+        background: rgba(190, 24, 93, 0.08);
+      }
+
+      50% {
+        background: rgba(236, 72, 153, 0.25);
+      }
+    }
+  </style>
 </head>
+
 <body>
 
-<header>
-  <div class="title">Spelling Catcher! 🩷</div>
-  <div class="subtitle">Catch the correctly spelled word — dodge the wrong ones!</div>
-</header>
+  <header>
+    <div class="title">Spelling Catcher! 🩷</div>
+    <div class="subtitle">Catch the correctly spelled word — dodge the wrong ones!</div>
+  </header>
 
-<div class="stats-row">
-  <div class="stat-pill">Score: <span id="score">0</span></div>
-  <div class="stat-pill">Lives: <span id="lives">❤️❤️❤️</span></div>
-  <div class="stat-pill">Word: <span id="word-num">1</span> / 10</div>
-</div>
+  <a href="index.html" class="back-btn" aria-label="Back to index">← Back</a>
 
-<div class="word-display">
-  <div class="word-label">What does this mean?</div>
-  <div class="word-hint" id="word-hint"></div>
-</div>
-
-<div class="arena" id="arena">
-  <div class="catcher" id="catcher"></div>
-  <div class="overlay show" id="start-overlay">
-    <div class="overlay-title">Spelling Catcher! 🩷</div>
-    <div class="overlay-sub">Words fall from the sky.<br>Catch the <b>correctly spelled</b> word!<br>Dodge the wrong spellings!</div>
-    <button class="overlay-btn" onclick="startGame()">Start game!</button>
+  <div class="stats-row">
+    <div class="stat-pill">Score: <span id="score">0</span></div>
+    <div class="stat-pill">Lives: <span id="lives">❤️❤️❤️</span></div>
+    <div class="stat-pill">Word: <span id="word-num">1</span> / 10</div>
   </div>
-  <div class="overlay" id="round-overlay">
-    <div class="overlay-title" id="round-title"></div>
-    <div class="overlay-sub" id="round-sub"></div>
-    <button class="overlay-btn" id="round-btn" onclick="nextWord()">Next word!</button>
+
+  <div class="word-display">
+    <div class="word-label">What does this mean?</div>
+    <div class="word-hint" id="word-hint"></div>
   </div>
-  <div class="overlay" id="end-overlay">
-    <div class="overlay-title" id="end-title"></div>
-    <div class="overlay-sub" id="end-sub"></div>
-    <button class="overlay-btn" onclick="startGame()">Play again! 🩷</button>
+
+  <div class="arena" id="arena">
+    <div class="catcher" id="catcher"></div>
+    <div class="overlay show" id="start-overlay">
+      <div class="overlay-title">Spelling Catcher! 🩷</div>
+      <div class="overlay-sub">Words fall from the sky.<br>Catch the <b>correctly spelled</b> word!<br>Dodge the wrong
+        spellings!</div>
+      <button class="overlay-btn" onclick="startGame()">Start game!</button>
+    </div>
+    <div class="overlay" id="round-overlay">
+      <div class="overlay-title" id="round-title"></div>
+      <div class="overlay-sub" id="round-sub"></div>
+      <button class="overlay-btn" id="round-btn" onclick="nextWord()">Next word!</button>
+    </div>
+    <div class="overlay" id="end-overlay">
+      <div class="overlay-title" id="end-title"></div>
+      <div class="overlay-sub" id="end-sub"></div>
+      <button class="overlay-btn" onclick="startGame()">Play again! 🩷</button>
+    </div>
   </div>
-</div>
 
-<div class="msg-bar" id="msg-bar">Catch the right spelling, dodge the wrong ones!</div>
+  <div class="msg-bar" id="msg-bar">Catch the right spelling, dodge the wrong ones!</div>
 
-<div class="btn-row">
-  <button class="action-btn" onclick="startGame()">Restart</button>
-</div>
-<div class="controls-hint">Move your mouse or drag your finger across the game area</div>
+  <div class="btn-row">
+    <button class="action-btn" onclick="startGame()">Restart</button>
+  </div>
+  <div class="controls-hint">Move your mouse or drag your finger across the game area</div>
 
-<script>
-const wordList = [
-  { correct: "CAT",    wrong: ["KAT", "CATT", "KATT"],         meaning: "A fluffy pet that meows" },
-  { correct: "JUMP",   wrong: ["JUMB", "JUPM", "JUMPP"],     meaning: "To leap up in the air" },
-  { correct: "RAIN",   wrong: ["RANE", "RAYN", "REIN"],      meaning: "Water that falls from clouds" },
-  { correct: "BOOK",   wrong: ["BOCK", "BUKE", "BOKK"],      meaning: "You read this at school" },
-  { correct: "HAPPY",  wrong: ["HAPPI", "HAPY", "HAPI"],     meaning: "How you feel when something is great" },
-  { correct: "LIGHT",  wrong: ["LITE", "LIHT", "LIGHTT"],    meaning: "The opposite of dark" },
-  { correct: "NIGHT",  wrong: ["NITE", "NIHT", "NIHGT"],     meaning: "When it gets dark outside" },
-  { correct: "TRAIN",  wrong: ["TRANE", "TRAYN", "TREIN"],   meaning: "A vehicle that runs on tracks" },
-  { correct: "FLOWER", wrong: ["FLOWR", "FLOWUR", "FLOUWER"],meaning: "A pretty plant that blooms" },
-  { correct: "BREAD",  wrong: ["BRED", "BRAED", "BREDE"],    meaning: "You put butter on this" },
-  { correct: "WATER",  wrong: ["WATUR", "WATR", "WATTER"],   meaning: "You drink this every day" },
-  { correct: "SNAKE",  wrong: ["SNAYK", "SNACK", "SNAEK"],   meaning: "A long slithery reptile" },
-  { correct: "CLOUD",  wrong: ["CLOWD", "CLOUED", "CLOWD"],  meaning: "Fluffy white thing in the sky" },
-  { correct: "SMILE",  wrong: ["SMYLE", "SMIEL", "SMIL"],    meaning: "What your face does when you're happy" },
-  { correct: "FROG",   wrong: ["FROGG", "FORG", "FROGE"],    meaning: "A green animal that hops" },
-];
+  <script>
+    const wordList = [
+      { correct: "CAT", wrong: ["KAT", "CATT", "KATT"], meaning: "A fluffy pet that meows" },
+      { correct: "JUMP", wrong: ["JUMB", "JUPM", "JUMPP"], meaning: "To leap up in the air" },
+      { correct: "RAIN", wrong: ["RANE", "RAYN", "REIN"], meaning: "Water that falls from clouds" },
+      { correct: "BOOK", wrong: ["BOCK", "BUKE", "BOKK"], meaning: "You read this at school" },
+      { correct: "HAPPY", wrong: ["HAPPI", "HAPY", "HAPI"], meaning: "How you feel when something is great" },
+      { correct: "LIGHT", wrong: ["LITE", "LIHT", "LIGHTT"], meaning: "The opposite of dark" },
+      { correct: "NIGHT", wrong: ["NITE", "NIHT", "NIHGT"], meaning: "When it gets dark outside" },
+      { correct: "TRAIN", wrong: ["TRANE", "TRAYN", "TREIN"], meaning: "A vehicle that runs on tracks" },
+      { correct: "FLOWER", wrong: ["FLOWR", "FLOWUR", "FLOUWER"], meaning: "A pretty plant that blooms" },
+      { correct: "BREAD", wrong: ["BRED", "BRAED", "BREDE"], meaning: "You put butter on this" },
+      { correct: "WATER", wrong: ["WATUR", "WATR", "WATTER"], meaning: "You drink this every day" },
+      { correct: "SNAKE", wrong: ["SNAYK", "SNACK", "SNAEK"], meaning: "A long slithery reptile" },
+      { correct: "CLOUD", wrong: ["CLOWD", "CLOUED", "CLOWD"], meaning: "Fluffy white thing in the sky" },
+      { correct: "SMILE", wrong: ["SMYLE", "SMIEL", "SMIL"], meaning: "What your face does when you're happy" },
+      { correct: "FROG", wrong: ["FROGG", "FORG", "FROGE"], meaning: "A green animal that hops" },
+    ];
 
-let score = 0, lives = 3, wordIndex = 0;
-let fallingItems = [], animFrameId = null, gameActive = false;
-let catcherX = 100, arenaW = 560, arenaH = 300;
-let spawnInterval = null, wordOrder = [], roundDone = false;
+    let score = 0, lives = 3, wordIndex = 0;
+    let fallingItems = [], animFrameId = null, gameActive = false;
+    let catcherX = 100, arenaW = 560, arenaH = 300;
+    let spawnInterval = null, wordOrder = [], roundDone = false;
 
-const arena   = document.getElementById('arena');
-const catcher = document.getElementById('catcher');
-const msgBar  = document.getElementById('msg-bar');
+    const arena = document.getElementById('arena');
+    const catcher = document.getElementById('catcher');
+    const msgBar = document.getElementById('msg-bar');
 
-function shuffle(arr) {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
-
-function startGame() {
-  score = 0; lives = 3; wordIndex = 0; roundDone = false;
-  wordOrder = shuffle([...Array(wordList.length).keys()]).slice(0, 10);
-  document.getElementById('score').textContent = 0;
-  document.getElementById('word-num').textContent = 1;
-  updateLives();
-  clearFalling();
-  clearInterval(spawnInterval);
-  cancelAnimationFrame(animFrameId);
-  ['start-overlay','round-overlay','end-overlay'].forEach(id =>
-    document.getElementById(id).classList.remove('show'));
-  gameActive = true;
-  loadWord();
-}
-
-function loadWord() {
-  roundDone = false;
-  clearFalling();
-  clearInterval(spawnInterval);
-
-  const entry = wordList[wordOrder[wordIndex]];
-  document.getElementById('word-hint').textContent = entry.meaning;
-  document.getElementById('word-num').textContent = wordIndex + 1;
-  msgBar.textContent = 'Catch the word that matches the meaning!';
-  msgBar.className = 'msg-bar';
-
-  updateArenaSize();
-
-  const wrongOptions = shuffle(entry.wrong).slice(0, 2);
-  const allOptions = [entry.correct, ...wrongOptions];
-
-  let tickCount = 0;
-  spawnInterval = setInterval(() => {
-    if (!gameActive || roundDone) return;
-    const spelling = allOptions[Math.floor(Math.random() * allOptions.length)];
-    tickCount++;
-    if (tickCount % 3 === 0) {
-      spawnWord(entry.correct, true);
-    } else {
-      spawnWord(spelling, spelling === entry.correct);
+    function shuffle(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
     }
-  }, 1400);
 
-  loop();
-}
-
-function spawnWord(text, isCorrect) {
-  const el = document.createElement('div');
-  const colorClass = 'c' + Math.floor(Math.random() * 6);
-  el.className = `falling-word ${colorClass}`;
-  el.textContent = text;
-
-  arena.appendChild(el);
-  const elW = el.offsetWidth || 100;
-  const x = Math.random() * Math.max(10, arenaW - elW - 10) + 5;
-  const duration = 3000 + Math.random() * 1500;
-
-  el.style.left = x + 'px';
-  el.style.animationDuration = duration + 'ms';
-
-  fallingItems.push({ el, x, elW, text, isCorrect, startTime: Date.now(), duration });
-}
-
-function clearFalling() {
-  fallingItems.forEach(f => f.el.remove());
-  fallingItems = [];
-}
-
-function updateArenaSize() {
-  const rect = arena.getBoundingClientRect();
-  arenaW = rect.width;
-  arenaH = rect.height;
-  catcherX = arenaW / 2;
-  updateCatcher();
-}
-
-function loop() {
-  if (!gameActive) return;
-  const now = Date.now();
-  const catchLeft  = catcherX - 55;
-  const catchRight = catcherX + 55;
-  const catchTop   = arenaH - 36;
-  const catchBot   = arenaH - 14;
-
-  fallingItems = fallingItems.filter(item => {
-    const elapsed  = now - item.startTime;
-    const progress = elapsed / item.duration;
-    const topPos   = progress * (arenaH + 60) - 60;
-
-    if (topPos > arenaH + 10) { item.el.remove(); return false; }
-
-    const itemRight = item.x + item.elW;
-    const itemBot   = topPos + 40;
-
-    if (!roundDone &&
-        itemBot >= catchTop && topPos <= catchBot &&
-        itemRight >= catchLeft && item.x <= catchRight) {
-      item.el.remove();
-      handleCatch(item.isCorrect, item.text);
-      return false;
+    function startGame() {
+      score = 0; lives = 3; wordIndex = 0; roundDone = false;
+      wordOrder = shuffle([...Array(wordList.length).keys()]).slice(0, 10);
+      document.getElementById('score').textContent = 0;
+      document.getElementById('word-num').textContent = 1;
+      updateLives();
+      clearFalling();
+      clearInterval(spawnInterval);
+      cancelAnimationFrame(animFrameId);
+      ['start-overlay', 'round-overlay', 'end-overlay'].forEach(id =>
+        document.getElementById(id).classList.remove('show'));
+      gameActive = true;
+      loadWord();
     }
-    return true;
-  });
 
-  animFrameId = requestAnimationFrame(loop);
-}
+    function loadWord() {
+      roundDone = false;
+      clearFalling();
+      clearInterval(spawnInterval);
 
-function handleCatch(isCorrect, text) {
-  if (roundDone) return;
-  if (isCorrect) {
-    roundDone = true;
-    score += 10;
-    document.getElementById('score').textContent = score;
-    msgBar.textContent = '🩷 Correct spelling!';
-    msgBar.className = 'msg-bar good';
-    arena.style.animation = 'flashGood 0.4s ease';
-    setTimeout(() => arena.style.animation = '', 400);
-    setTimeout(showRoundWin, 600);
-  } else {
-    lives = Math.max(0, lives - 1);
-    updateLives();
-    msgBar.textContent = `❌ Wrong! The correct spelling is: ${wordList[wordOrder[wordIndex]].correct}`;
-    msgBar.className = 'msg-bar bad';
-    arena.style.animation = 'flashBad 0.3s ease';
-    setTimeout(() => { arena.style.animation = ''; msgBar.className = 'msg-bar'; }, 300);
-    if (lives === 0) setTimeout(showGameOver, 400);
-  }
-}
+      const entry = wordList[wordOrder[wordIndex]];
+      document.getElementById('word-hint').textContent = entry.meaning;
+      document.getElementById('word-num').textContent = wordIndex + 1;
+      msgBar.textContent = 'Catch the word that matches the meaning!';
+      msgBar.className = 'msg-bar';
 
-function showRoundWin() {
-  clearInterval(spawnInterval);
-  clearFalling();
-  const entry = wordList[wordOrder[wordIndex]];
-  document.getElementById('round-title').textContent = '🩷 ' + entry.correct + '!';
-  document.getElementById('round-sub').textContent =
-    wordIndex < 9
-      ? `That's the right spelling! Score: ${score}`
-      : `Last word done! Final score: ${score}`;
-  const btn = document.getElementById('round-btn');
-  btn.textContent = wordIndex < 9 ? 'Next word! →' : 'See your score!';
-  document.getElementById('round-overlay').classList.add('show');
-}
+      updateArenaSize();
 
-function nextWord() {
-  wordIndex++;
-  document.getElementById('round-overlay').classList.remove('show');
-  if (wordIndex >= 10) {
-    showEndScreen();
-  } else {
-    loadWord();
-  }
-}
+      const wrongOptions = shuffle(entry.wrong).slice(0, 2);
+      const allOptions = [entry.correct, ...wrongOptions];
 
-function showGameOver() {
-  gameActive = false;
-  clearInterval(spawnInterval);
-  cancelAnimationFrame(animFrameId);
-  clearFalling();
-  const entry = wordList[wordOrder[wordIndex]];
-  document.getElementById('end-overlay').classList.add('show');
-  document.getElementById('end-title').textContent = 'Game over! 💔';
-  document.getElementById('end-sub').innerHTML = `The correct spelling was:<br><span style='font-size:1.4rem;color:#fbcfe8;font-family:Fredoka One,cursive'>${entry.correct}</span><br><br>You scored ${score} points — try again!`;
-}
+      let tickCount = 0;
+      spawnInterval = setInterval(() => {
+        if (!gameActive || roundDone) return;
+        const spelling = allOptions[Math.floor(Math.random() * allOptions.length)];
+        tickCount++;
+        if (tickCount % 3 === 0) {
+          spawnWord(entry.correct, true);
+        } else {
+          spawnWord(spelling, spelling === entry.correct);
+        }
+      }, 1400);
 
-function showEndScreen() {
-  gameActive = false;
-  clearInterval(spawnInterval);
-  cancelAnimationFrame(animFrameId);
-  const stars = score >= 90 ? '⭐⭐⭐' : score >= 60 ? '⭐⭐' : '⭐';
-  document.getElementById('end-overlay').classList.add('show');
-  document.getElementById('end-title').textContent =
-    score >= 90 ? 'Amazing! 🏆' : score >= 60 ? 'Well done! 🎉' : 'Good try! 💪';
-  document.getElementById('end-sub').textContent = `${stars}  You scored ${score} out of 100!`;
-}
+      loop();
+    }
 
-function updateLives() {
-  const h = ['💔', '❤️', '❤️❤️', '❤️❤️❤️'];
-  document.getElementById('lives').textContent = h[lives] || '💔';
-}
+    function spawnWord(text, isCorrect) {
+      const el = document.createElement('div');
+      const colorClass = 'c' + Math.floor(Math.random() * 6);
+      el.className = `falling-word ${colorClass}`;
+      el.textContent = text;
 
-function updateCatcher() {
-  catcher.style.left = catcherX + 'px';
-}
+      arena.appendChild(el);
+      const elW = el.offsetWidth || 100;
+      const x = Math.random() * Math.max(10, arenaW - elW - 10) + 5;
+      const duration = 3000 + Math.random() * 1500;
 
-arena.addEventListener('mousemove', e => {
-  const rect = arena.getBoundingClientRect();
-  catcherX = Math.max(55, Math.min(arenaW - 55, e.clientX - rect.left));
-  updateCatcher();
-});
+      el.style.left = x + 'px';
+      el.style.animationDuration = duration + 'ms';
 
-arena.addEventListener('touchmove', e => {
-  e.preventDefault();
-  const rect = arena.getBoundingClientRect();
-  catcherX = Math.max(55, Math.min(arenaW - 55, e.touches[0].clientX - rect.left));
-  updateCatcher();
-}, { passive: false });
+      fallingItems.push({ el, x, elW, text, isCorrect, startTime: Date.now(), duration });
+    }
 
-window.addEventListener('resize', updateArenaSize);
-updateArenaSize();
-</script>
+    function clearFalling() {
+      fallingItems.forEach(f => f.el.remove());
+      fallingItems = [];
+    }
+
+    function updateArenaSize() {
+      const rect = arena.getBoundingClientRect();
+      arenaW = rect.width;
+      arenaH = rect.height;
+      catcherX = arenaW / 2;
+      updateCatcher();
+    }
+
+    function loop() {
+      if (!gameActive) return;
+      const now = Date.now();
+      const catchLeft = catcherX - 55;
+      const catchRight = catcherX + 55;
+      const catchTop = arenaH - 36;
+      const catchBot = arenaH - 14;
+
+      fallingItems = fallingItems.filter(item => {
+        const elapsed = now - item.startTime;
+        const progress = elapsed / item.duration;
+        const topPos = progress * (arenaH + 60) - 60;
+
+        if (topPos > arenaH + 10) { item.el.remove(); return false; }
+
+        const itemRight = item.x + item.elW;
+        const itemBot = topPos + 40;
+
+        if (!roundDone &&
+          itemBot >= catchTop && topPos <= catchBot &&
+          itemRight >= catchLeft && item.x <= catchRight) {
+          item.el.remove();
+          handleCatch(item.isCorrect, item.text);
+          return false;
+        }
+        return true;
+      });
+
+      animFrameId = requestAnimationFrame(loop);
+    }
+
+    function handleCatch(isCorrect, text) {
+      if (roundDone) return;
+      if (isCorrect) {
+        roundDone = true;
+        score += 10;
+        document.getElementById('score').textContent = score;
+        msgBar.textContent = '🩷 Correct spelling!';
+        msgBar.className = 'msg-bar good';
+        arena.style.animation = 'flashGood 0.4s ease';
+        setTimeout(() => arena.style.animation = '', 400);
+        setTimeout(showRoundWin, 600);
+      } else {
+        lives = Math.max(0, lives - 1);
+        updateLives();
+        msgBar.textContent = `❌ Wrong! The correct spelling is: ${wordList[wordOrder[wordIndex]].correct}`;
+        msgBar.className = 'msg-bar bad';
+        arena.style.animation = 'flashBad 0.3s ease';
+        setTimeout(() => { arena.style.animation = ''; msgBar.className = 'msg-bar'; }, 300);
+        if (lives === 0) setTimeout(showGameOver, 400);
+      }
+    }
+
+    function showRoundWin() {
+      clearInterval(spawnInterval);
+      clearFalling();
+      const entry = wordList[wordOrder[wordIndex]];
+      document.getElementById('round-title').textContent = '🩷 ' + entry.correct + '!';
+      document.getElementById('round-sub').textContent =
+        wordIndex < 9
+          ? `That's the right spelling! Score: ${score}`
+          : `Last word done! Final score: ${score}`;
+      const btn = document.getElementById('round-btn');
+      btn.textContent = wordIndex < 9 ? 'Next word! →' : 'See your score!';
+      document.getElementById('round-overlay').classList.add('show');
+    }
+
+    function nextWord() {
+      wordIndex++;
+      document.getElementById('round-overlay').classList.remove('show');
+      if (wordIndex >= 10) {
+        showEndScreen();
+      } else {
+        loadWord();
+      }
+    }
+
+    function showGameOver() {
+      gameActive = false;
+      clearInterval(spawnInterval);
+      cancelAnimationFrame(animFrameId);
+      clearFalling();
+      const entry = wordList[wordOrder[wordIndex]];
+      document.getElementById('end-overlay').classList.add('show');
+      document.getElementById('end-title').textContent = 'Game over! 💔';
+      document.getElementById('end-sub').innerHTML = `The correct spelling was:<br><span style='font-size:1.4rem;color:#fbcfe8;font-family:Fredoka One,cursive'>${entry.correct}</span><br><br>You scored ${score} points — try again!`;
+    }
+
+    function showEndScreen() {
+      gameActive = false;
+      clearInterval(spawnInterval);
+      cancelAnimationFrame(animFrameId);
+      const stars = score >= 90 ? '⭐⭐⭐' : score >= 60 ? '⭐⭐' : '⭐';
+      document.getElementById('end-overlay').classList.add('show');
+      document.getElementById('end-title').textContent =
+        score >= 90 ? 'Amazing! 🏆' : score >= 60 ? 'Well done! 🎉' : 'Good try! 💪';
+      document.getElementById('end-sub').textContent = `${stars}  You scored ${score} out of 100!`;
+    }
+
+    function updateLives() {
+      const h = ['💔', '❤️', '❤️❤️', '❤️❤️❤️'];
+      document.getElementById('lives').textContent = h[lives] || '💔';
+    }
+
+    function updateCatcher() {
+      catcher.style.left = catcherX + 'px';
+    }
+
+    arena.addEventListener('mousemove', e => {
+      const rect = arena.getBoundingClientRect();
+      catcherX = Math.max(55, Math.min(arenaW - 55, e.clientX - rect.left));
+      updateCatcher();
+    });
+
+    arena.addEventListener('touchmove', e => {
+      e.preventDefault();
+      const rect = arena.getBoundingClientRect();
+      catcherX = Math.max(55, Math.min(arenaW - 55, e.touches[0].clientX - rect.left));
+      updateCatcher();
+    }, { passive: false });
+
+    window.addEventListener('resize', updateArenaSize);
+    updateArenaSize();
+  </script>
 </body>
+
 </html>

@@ -1,455 +1,550 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KATSEYE Quiz</title>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --green: #4caf50;
-    --green-dark: #2e7d32;
-    --green-light: #c8e6c9;
-    --green-pale: #f1f8e9;
-    --pink: #f48fb1;
-    --pink-light: #fce4ec;
-    --yellow: #fff176;
-    --yellow-dark: #f9a825;
-    --white: #ffffff;
-    --text: #1b2a1b;
-    --text-muted: #4a6741;
-    --radius: 18px;
-    --radius-sm: 10px;
-  }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KATSEYE Quiz</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --green: #4caf50;
+      --green-dark: #2e7d32;
+      --green-light: #c8e6c9;
+      --green-pale: #f1f8e9;
+      --pink: #f48fb1;
+      --pink-light: #fce4ec;
+      --yellow: #fff176;
+      --yellow-dark: #f9a825;
+      --white: #ffffff;
+      --text: #1b2a1b;
+      --text-muted: #4a6741;
+      --radius: 18px;
+      --radius-sm: 10px;
+    }
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-  body {
-    font-family: 'Nunito', sans-serif;
-    background: var(--green-pale);
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-    padding: 24px 16px 48px;
-    background-image:
-      radial-gradient(circle at 10% 20%, #c8e6c9 0%, transparent 40%),
-      radial-gradient(circle at 90% 80%, #dcedc8 0%, transparent 40%);
-  }
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: var(--green-pale);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 24px 16px 48px;
+      background-image:
+        radial-gradient(circle at 10% 20%, #c8e6c9 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, #dcedc8 0%, transparent 40%);
+    }
 
-  header {
-    text-align: center;
-    margin-bottom: 28px;
-    animation: popIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
-  }
+    header {
+      text-align: center;
+      margin-bottom: 28px;
+      animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
 
-  .logo {
-    font-family: 'Fredoka One', cursive;
-    font-size: clamp(2.2rem, 6vw, 3.5rem);
-    color: var(--green-dark);
-    letter-spacing: 2px;
-    line-height: 1;
-    text-shadow: 3px 3px 0 var(--green-light);
-  }
+    .logo {
+      font-family: 'Fredoka One', cursive;
+      font-size: clamp(2.2rem, 6vw, 3.5rem);
+      color: var(--green-dark);
+      letter-spacing: 2px;
+      line-height: 1;
+      text-shadow: 3px 3px 0 var(--green-light);
+    }
 
-  .logo span {
-    color: var(--pink);
-    text-shadow: 3px 3px 0 #f8bbd0;
-  }
+    .logo span {
+      color: var(--pink);
+      text-shadow: 3px 3px 0 #f8bbd0;
+    }
 
-  .subtitle {
-    font-size: 1rem;
-    color: var(--text-muted);
-    font-weight: 600;
-    margin-top: 6px;
-    letter-spacing: 1px;
-  }
+    .subtitle {
+      font-size: 1rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      margin-top: 6px;
+      letter-spacing: 1px;
+    }
 
-  .card {
-    background: var(--white);
-    border-radius: var(--radius);
-    padding: 28px 28px 24px;
-    width: 100%;
-    max-width: 560px;
-    box-shadow: 0 8px 32px rgba(76,175,80,0.13), 0 2px 8px rgba(0,0,0,0.06);
-    animation: slideUp 0.4s cubic-bezier(0.34,1.2,0.64,1) both;
-  }
+    .card {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 28px 28px 24px;
+      width: 100%;
+      max-width: 560px;
+      box-shadow: 0 8px 32px rgba(76, 175, 80, 0.13), 0 2px 8px rgba(0, 0, 0, 0.06);
+      animation: slideUp 0.4s cubic-bezier(0.34, 1.2, 0.64, 1) both;
+    }
 
-  .progress-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 20px;
-  }
+    .progress-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
 
-  .progress-track {
-    flex: 1;
-    height: 10px;
-    background: var(--green-light);
-    border-radius: 99px;
-    overflow: hidden;
-  }
+    .progress-track {
+      flex: 1;
+      height: 10px;
+      background: var(--green-light);
+      border-radius: 99px;
+      overflow: hidden;
+    }
 
-  .progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--green), #81c784);
-    border-radius: 99px;
-    transition: width 0.4s cubic-bezier(0.34,1.2,0.64,1);
-    width: 0%;
-  }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--green), #81c784);
+      border-radius: 99px;
+      transition: width 0.4s cubic-bezier(0.34, 1.2, 0.64, 1);
+      width: 0%;
+    }
 
-  .q-label {
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--text-muted);
-    white-space: nowrap;
-  }
+    .q-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
 
-  .score-badge {
-    background: var(--green-pale);
-    border: 2px solid var(--green-light);
-    border-radius: 99px;
-    padding: 4px 14px;
-    font-size: 14px;
-    font-weight: 800;
-    color: var(--green-dark);
-    white-space: nowrap;
-  }
+    .score-badge {
+      background: var(--green-pale);
+      border: 2px solid var(--green-light);
+      border-radius: 99px;
+      padding: 4px 14px;
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--green-dark);
+      white-space: nowrap;
+    }
 
-  .question-text {
-    font-size: clamp(1.05rem, 3vw, 1.25rem);
-    font-weight: 800;
-    color: var(--text);
-    line-height: 1.45;
-    margin-bottom: 22px;
-  }
+    .question-text {
+      font-size: clamp(1.05rem, 3vw, 1.25rem);
+      font-weight: 800;
+      color: var(--text);
+      line-height: 1.45;
+      margin-bottom: 22px;
+    }
 
-  .answers {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    margin-bottom: 20px;
-  }
+    .answers {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
 
-  .ans-btn {
-    background: var(--green-pale);
-    border: 2.5px solid var(--green-light);
-    border-radius: var(--radius-sm);
-    padding: 14px 12px;
-    font-family: 'Nunito', sans-serif;
-    font-size: 15px;
-    font-weight: 700;
-    color: var(--text);
-    cursor: pointer;
-    text-align: center;
-    line-height: 1.3;
-    transition: transform 0.12s, background 0.15s, border-color 0.15s, box-shadow 0.15s;
-  }
+    .ans-btn {
+      background: var(--green-pale);
+      border: 2.5px solid var(--green-light);
+      border-radius: var(--radius-sm);
+      padding: 14px 12px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+      cursor: pointer;
+      text-align: center;
+      line-height: 1.3;
+      transition: transform 0.12s, background 0.15s, border-color 0.15s, box-shadow 0.15s;
+    }
 
-  .ans-btn:hover:not(:disabled) {
-    background: var(--green-light);
-    border-color: var(--green);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(76,175,80,0.2);
-  }
+    .ans-btn:hover:not(:disabled) {
+      background: var(--green-light);
+      border-color: var(--green);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(76, 175, 80, 0.2);
+    }
 
-  .ans-btn:active:not(:disabled) {
-    transform: scale(0.97);
-  }
+    .ans-btn:active:not(:disabled) {
+      transform: scale(0.97);
+    }
 
-  .ans-btn.correct {
-    background: #e8f5e9;
-    border-color: var(--green-dark);
-    color: var(--green-dark);
-    animation: correctPop 0.35s cubic-bezier(0.34,1.56,0.64,1) both;
-  }
+    .ans-btn.correct {
+      background: #e8f5e9;
+      border-color: var(--green-dark);
+      color: var(--green-dark);
+      animation: correctPop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
 
-  .ans-btn.wrong {
-    background: #ffebee;
-    border-color: #e57373;
-    color: #c62828;
-  }
+    .ans-btn.wrong {
+      background: #ffebee;
+      border-color: #e57373;
+      color: #c62828;
+    }
 
-  .ans-btn:disabled { cursor: default; }
+    .ans-btn:disabled {
+      cursor: default;
+    }
 
-  .feedback {
-    min-height: 30px;
-    font-size: 15px;
-    font-weight: 700;
-    text-align: center;
-    border-radius: var(--radius-sm);
-    padding: 6px 12px;
-    margin-bottom: 16px;
-    transition: opacity 0.2s;
-  }
+    .feedback {
+      min-height: 30px;
+      font-size: 15px;
+      font-weight: 700;
+      text-align: center;
+      border-radius: var(--radius-sm);
+      padding: 6px 12px;
+      margin-bottom: 16px;
+      transition: opacity 0.2s;
+    }
 
-  .feedback.good {
-    background: #e8f5e9;
-    color: var(--green-dark);
-  }
+    .feedback.good {
+      background: #e8f5e9;
+      color: var(--green-dark);
+    }
 
-  .feedback.bad {
-    background: #ffebee;
-    color: #c62828;
-  }
+    .feedback.bad {
+      background: #ffebee;
+      color: #c62828;
+    }
 
-  .next-btn {
-    display: none;
-    width: 100%;
-    background: var(--green-dark);
-    color: white;
-    border: none;
-    border-radius: var(--radius-sm);
-    padding: 15px;
-    font-family: 'Nunito', sans-serif;
-    font-size: 16px;
-    font-weight: 800;
-    cursor: pointer;
-    letter-spacing: 0.5px;
-    transition: background 0.15s, transform 0.12s;
-  }
+    .next-btn {
+      display: none;
+      width: 100%;
+      background: var(--green-dark);
+      color: white;
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 15px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      letter-spacing: 0.5px;
+      transition: background 0.15s, transform 0.12s;
+    }
 
-  .next-btn:hover { background: #1b5e20; transform: translateY(-1px); }
-  .next-btn:active { transform: scale(0.98); }
+    .next-btn:hover {
+      background: #1b5e20;
+      transform: translateY(-1px);
+    }
 
-  .end-screen {
-    display: none;
-    text-align: center;
-    padding: 12px 0 4px;
-    animation: popIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
-  }
+    .next-btn:active {
+      transform: scale(0.98);
+    }
 
-  .stars {
-    font-size: 2.4rem;
-    letter-spacing: 6px;
-    margin-bottom: 12px;
-    color: var(--yellow-dark);
-  }
+    .end-screen {
+      display: none;
+      text-align: center;
+      padding: 12px 0 4px;
+      animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
 
-  .end-title {
-    font-family: 'Fredoka One', cursive;
-    font-size: 2rem;
-    color: var(--green-dark);
-    margin-bottom: 8px;
-  }
+    .stars {
+      font-size: 2.4rem;
+      letter-spacing: 6px;
+      margin-bottom: 12px;
+      color: var(--yellow-dark);
+    }
 
-  .end-score {
-    font-size: 3.5rem;
-    font-weight: 900;
-    color: var(--green-dark);
-    line-height: 1;
-    margin-bottom: 10px;
-  }
+    .end-title {
+      font-family: 'Fredoka One', cursive;
+      font-size: 2rem;
+      color: var(--green-dark);
+      margin-bottom: 8px;
+    }
 
-  .end-msg {
-    font-size: 1rem;
-    color: var(--text-muted);
-    font-weight: 600;
-    margin-bottom: 24px;
-    line-height: 1.5;
-  }
+    .end-score {
+      font-size: 3.5rem;
+      font-weight: 900;
+      color: var(--green-dark);
+      line-height: 1;
+      margin-bottom: 10px;
+    }
 
-  .restart-btn {
-    background: var(--green-dark);
-    color: white;
-    border: none;
-    border-radius: var(--radius-sm);
-    padding: 15px 36px;
-    font-family: 'Nunito', sans-serif;
-    font-size: 16px;
-    font-weight: 800;
-    cursor: pointer;
-    transition: background 0.15s, transform 0.12s;
-    letter-spacing: 0.5px;
-  }
+    .end-msg {
+      font-size: 1rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
 
-  .restart-btn:hover { background: #1b5e20; transform: translateY(-1px); }
+    .restart-btn {
+      background: var(--green-dark);
+      color: white;
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 15px 36px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.12s;
+      letter-spacing: 0.5px;
+    }
 
-  .decoration {
-    position: fixed;
-    pointer-events: none;
-    opacity: 0.18;
-    font-size: 5rem;
-    user-select: none;
-    animation: float 6s ease-in-out infinite;
-  }
+    .restart-btn:hover {
+      background: #1b5e20;
+      transform: translateY(-1px);
+    }
 
-  .decoration.d1 { top: 5%; left: 3%; animation-delay: 0s; }
-  .decoration.d2 { top: 15%; right: 4%; animation-delay: 1.5s; }
-  .decoration.d3 { bottom: 18%; left: 5%; animation-delay: 3s; }
-  .decoration.d4 { bottom: 10%; right: 3%; animation-delay: 0.8s; }
+    /* Back button */
+    .back-btn {
+      position: absolute;
+      left: 16px;
+      top: 16px;
+      background: var(--white);
+      color: var(--green-dark);
+      padding: 8px 12px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: 800;
+      border: 1px solid var(--green-light);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+      z-index: 150;
+    }
 
-  @keyframes float {
-    0%, 100% { transform: translateY(0) rotate(-5deg); }
-    50% { transform: translateY(-18px) rotate(5deg); }
-  }
+    .back-btn:hover {
+      transform: translateY(-2px);
+    }
 
-  @keyframes popIn {
-    from { opacity: 0; transform: scale(0.85); }
-    to { opacity: 1; transform: scale(1); }
-  }
+    .decoration {
+      position: fixed;
+      pointer-events: none;
+      opacity: 0.18;
+      font-size: 5rem;
+      user-select: none;
+      animation: float 6s ease-in-out infinite;
+    }
 
-  @keyframes slideUp {
-    from { opacity: 0; transform: translateY(24px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
+    .decoration.d1 {
+      top: 5%;
+      left: 3%;
+      animation-delay: 0s;
+    }
 
-  @keyframes correctPop {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.06); }
-    100% { transform: scale(1); }
-  }
+    .decoration.d2 {
+      top: 15%;
+      right: 4%;
+      animation-delay: 1.5s;
+    }
 
-  @media (max-width: 420px) {
-    .answers { grid-template-columns: 1fr; }
-    .card { padding: 20px 16px; }
-  }
-</style>
+    .decoration.d3 {
+      bottom: 18%;
+      left: 5%;
+      animation-delay: 3s;
+    }
+
+    .decoration.d4 {
+      bottom: 10%;
+      right: 3%;
+      animation-delay: 0.8s;
+    }
+
+    @keyframes float {
+
+      0%,
+      100% {
+        transform: translateY(0) rotate(-5deg);
+      }
+
+      50% {
+        transform: translateY(-18px) rotate(5deg);
+      }
+    }
+
+    @keyframes popIn {
+      from {
+        opacity: 0;
+        transform: scale(0.85);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(24px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes correctPop {
+      0% {
+        transform: scale(1);
+      }
+
+      50% {
+        transform: scale(1.06);
+      }
+
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    @media (max-width: 420px) {
+      .answers {
+        grid-template-columns: 1fr;
+      }
+
+      .card {
+        padding: 20px 16px;
+      }
+    }
+  </style>
 </head>
+
 <body>
 
-<div class="decoration d1">🎵</div>
-<div class="decoration d2">⭐</div>
-<div class="decoration d3">💚</div>
-<div class="decoration d4">🎤</div>
+  <div class="decoration d1">🎵</div>
+  <div class="decoration d2">⭐</div>
+  <div class="decoration d3">💚</div>
+  <div class="decoration d4">🎤</div>
 
-<header>
-  <div class="logo">KAT<span>SEYE</span> QUIZ</div>
-  <div class="subtitle">How well do you know the group?</div>
-</header>
+  <header>
+    <a href="index.html" class="back-btn" aria-label="Back to index">← Back</a>
+    <div class="logo">KAT<span>SEYE</span> QUIZ</div>
+    <div class="subtitle">How well do you know the group?</div>
+  </header>
 
-<div class="card" id="quiz-card">
-  <div id="game-area">
-    <div class="progress-row">
-      <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
-      <span class="q-label" id="q-counter">1 / 10</span>
-      <span class="score-badge">Score: <span id="score-num">0</span></span>
+  <div class="card" id="quiz-card">
+    <div id="game-area">
+      <div class="progress-row">
+        <div class="progress-track">
+          <div class="progress-fill" id="progress-fill"></div>
+        </div>
+        <span class="q-label" id="q-counter">1 / 10</span>
+        <span class="score-badge">Score: <span id="score-num">0</span></span>
+      </div>
+
+      <p class="question-text" id="question-text"></p>
+      <div class="answers" id="answers"></div>
+      <div class="feedback" id="feedback"></div>
+      <button class="next-btn" id="next-btn">Next question →</button>
     </div>
 
-    <p class="question-text" id="question-text"></p>
-    <div class="answers" id="answers"></div>
-    <div class="feedback" id="feedback"></div>
-    <button class="next-btn" id="next-btn">Next question →</button>
+    <div class="end-screen" id="end-screen">
+      <div class="stars" id="stars"></div>
+      <div class="end-title" id="end-title"></div>
+      <div class="end-score" id="end-score"></div>
+      <div class="end-msg" id="end-msg"></div>
+      <button class="restart-btn" id="restart-btn">Play again!</button>
+    </div>
   </div>
 
-  <div class="end-screen" id="end-screen">
-    <div class="stars" id="stars"></div>
-    <div class="end-title" id="end-title"></div>
-    <div class="end-score" id="end-score"></div>
-    <div class="end-msg" id="end-msg"></div>
-    <button class="restart-btn" id="restart-btn">Play again!</button>
-  </div>
-</div>
+  <script>
+    const questions = [
+      { q: "How many members are currently performing in KATSEYE?", answers: ["4", "5", "6", "7"], correct: 1 },
+      { q: "Which member is the leader of KATSEYE?", answers: ["Megan", "Sophia", "Lara", "Yoonchae"], correct: 1 },
+      { q: "Where is Yoonchae from?", answers: ["Philippines", "Switzerland", "South Korea", "USA"], correct: 2 },
+      { q: "What was KATSEYE's debut single called?", answers: ["SIS", "Debut", "Gnarly", "Gabriela"], correct: 1 },
+      { q: "Which show did KATSEYE form on?", answers: ["The Debut: Dream Academy", "K-pop Star", "Produce 101", "Idol School"], correct: 0 },
+      { q: "Which two companies created KATSEYE together?", answers: ["SM & Columbia", "HYBE & Geffen", "YG & Atlantic", "JYP & Universal"], correct: 1 },
+      { q: "Which member went on hiatus in February 2026?", answers: ["Lara", "Megan", "Manon", "Daniela"], correct: 2 },
+      { q: "What does KATSEYE's name come from?", answers: ["A cat's paw", "A gemstone", "A dance move", "A song"], correct: 1 },
+      { q: "Which member is from Manila, Philippines?", answers: ["Daniela", "Lara", "Sophia", "Megan"], correct: 2 },
+      { q: "What is KATSEYE's fandom name?", answers: ["EYEKONS", "KATSEYS", "DREAMERS", "STARLIGHTS"], correct: 0 }
+    ];
 
-<script>
-const questions = [
-  { q: "How many members are currently performing in KATSEYE?", answers: ["4", "5", "6", "7"], correct: 1 },
-  { q: "Which member is the leader of KATSEYE?", answers: ["Megan", "Sophia", "Lara", "Yoonchae"], correct: 1 },
-  { q: "Where is Yoonchae from?", answers: ["Philippines", "Switzerland", "South Korea", "USA"], correct: 2 },
-  { q: "What was KATSEYE's debut single called?", answers: ["SIS", "Debut", "Gnarly", "Gabriela"], correct: 1 },
-  { q: "Which show did KATSEYE form on?", answers: ["The Debut: Dream Academy", "K-pop Star", "Produce 101", "Idol School"], correct: 0 },
-  { q: "Which two companies created KATSEYE together?", answers: ["SM & Columbia", "HYBE & Geffen", "YG & Atlantic", "JYP & Universal"], correct: 1 },
-  { q: "Which member went on hiatus in February 2026?", answers: ["Lara", "Megan", "Manon", "Daniela"], correct: 2 },
-  { q: "What does KATSEYE's name come from?", answers: ["A cat's paw", "A gemstone", "A dance move", "A song"], correct: 1 },
-  { q: "Which member is from Manila, Philippines?", answers: ["Daniela", "Lara", "Sophia", "Megan"], correct: 2 },
-  { q: "What is KATSEYE's fandom name?", answers: ["EYEKONS", "KATSEYS", "DREAMERS", "STARLIGHTS"], correct: 0 }
-];
+    let current = 0, score = 0, answered = false, order = [];
 
-let current = 0, score = 0, answered = false, order = [];
+    function shuffle(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
 
-function shuffle(arr) {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
+    function startQuiz() {
+      order = shuffle([...Array(questions.length).keys()]);
+      current = 0; score = 0; answered = false;
+      document.getElementById('end-screen').style.display = 'none';
+      document.getElementById('game-area').style.display = 'block';
+      document.getElementById('feedback').textContent = '';
+      document.getElementById('feedback').className = 'feedback';
+      document.getElementById('next-btn').style.display = 'none';
+      document.getElementById('score-num').textContent = '0';
+      loadQuestion();
+    }
 
-function startQuiz() {
-  order = shuffle([...Array(questions.length).keys()]);
-  current = 0; score = 0; answered = false;
-  document.getElementById('end-screen').style.display = 'none';
-  document.getElementById('game-area').style.display = 'block';
-  document.getElementById('feedback').textContent = '';
-  document.getElementById('feedback').className = 'feedback';
-  document.getElementById('next-btn').style.display = 'none';
-  document.getElementById('score-num').textContent = '0';
-  loadQuestion();
-}
+    function loadQuestion() {
+      answered = false;
+      const q = questions[order[current]];
+      document.getElementById('question-text').textContent = q.q;
+      document.getElementById('q-counter').textContent = `${current + 1} / ${questions.length}`;
+      document.getElementById('progress-fill').style.width = `${(current / questions.length) * 100}%`;
+      document.getElementById('feedback').textContent = '';
+      document.getElementById('feedback').className = 'feedback';
+      document.getElementById('next-btn').style.display = 'none';
 
-function loadQuestion() {
-  answered = false;
-  const q = questions[order[current]];
-  document.getElementById('question-text').textContent = q.q;
-  document.getElementById('q-counter').textContent = `${current + 1} / ${questions.length}`;
-  document.getElementById('progress-fill').style.width = `${(current / questions.length) * 100}%`;
-  document.getElementById('feedback').textContent = '';
-  document.getElementById('feedback').className = 'feedback';
-  document.getElementById('next-btn').style.display = 'none';
+      const answersDiv = document.getElementById('answers');
+      answersDiv.innerHTML = '';
+      q.answers.forEach((a, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'ans-btn';
+        btn.textContent = a;
+        btn.onclick = () => selectAnswer(i);
+        answersDiv.appendChild(btn);
+      });
+    }
 
-  const answersDiv = document.getElementById('answers');
-  answersDiv.innerHTML = '';
-  q.answers.forEach((a, i) => {
-    const btn = document.createElement('button');
-    btn.className = 'ans-btn';
-    btn.textContent = a;
-    btn.onclick = () => selectAnswer(i);
-    answersDiv.appendChild(btn);
-  });
-}
+    function selectAnswer(chosen) {
+      if (answered) return;
+      answered = true;
+      const q = questions[order[current]];
+      const correct = q.correct;
+      const btns = document.querySelectorAll('.ans-btn');
+      btns.forEach(b => b.disabled = true);
+      btns[correct].classList.add('correct');
 
-function selectAnswer(chosen) {
-  if (answered) return;
-  answered = true;
-  const q = questions[order[current]];
-  const correct = q.correct;
-  const btns = document.querySelectorAll('.ans-btn');
-  btns.forEach(b => b.disabled = true);
-  btns[correct].classList.add('correct');
+      const fb = document.getElementById('feedback');
+      if (chosen === correct) {
+        score++;
+        document.getElementById('score-num').textContent = score;
+        const cheers = ["Amazing! 🌟", "Brilliant! 💚", "You got it! ⭐", "Superstar! 🎤", "Correct! 🎵"];
+        fb.textContent = cheers[Math.floor(Math.random() * cheers.length)];
+        fb.className = 'feedback good';
+      } else {
+        btns[chosen].classList.add('wrong');
+        fb.textContent = `Not quite! The right answer is: ${q.answers[correct]}`;
+        fb.className = 'feedback bad';
+      }
 
-  const fb = document.getElementById('feedback');
-  if (chosen === correct) {
-    score++;
-    document.getElementById('score-num').textContent = score;
-    const cheers = ["Amazing! 🌟", "Brilliant! 💚", "You got it! ⭐", "Superstar! 🎤", "Correct! 🎵"];
-    fb.textContent = cheers[Math.floor(Math.random() * cheers.length)];
-    fb.className = 'feedback good';
-  } else {
-    btns[chosen].classList.add('wrong');
-    fb.textContent = `Not quite! The right answer is: ${q.answers[correct]}`;
-    fb.className = 'feedback bad';
-  }
+      if (current < questions.length - 1) {
+        document.getElementById('next-btn').style.display = 'block';
+      } else {
+        document.getElementById('progress-fill').style.width = '100%';
+        setTimeout(showEnd, 1200);
+      }
+    }
 
-  if (current < questions.length - 1) {
-    document.getElementById('next-btn').style.display = 'block';
-  } else {
-    document.getElementById('progress-fill').style.width = '100%';
-    setTimeout(showEnd, 1200);
-  }
-}
+    function showEnd() {
+      document.getElementById('game-area').style.display = 'none';
+      const pct = score / questions.length;
+      const stars = pct >= 0.9 ? 5 : pct >= 0.7 ? 4 : pct >= 0.5 ? 3 : pct >= 0.3 ? 2 : 1;
+      document.getElementById('stars').textContent = '★'.repeat(stars) + '☆'.repeat(5 - stars);
+      document.getElementById('end-title').textContent = score === 10 ? "Perfect score!" : "Quiz finished!";
+      document.getElementById('end-score').textContent = `${score} / ${questions.length}`;
+      document.getElementById('end-msg').textContent =
+        score === 10 ? "You're a true EYEKON! You know everything about KATSEYE!" :
+          score >= 7 ? "Wow, you really know your KATSEYE! Amazing!" :
+            score >= 5 ? "Great job — you know loads about them!" :
+              score >= 3 ? "Good try! Play again to beat your score!" :
+                "Keep learning about KATSEYE and try again!";
+      document.getElementById('end-screen').style.display = 'block';
+    }
 
-function showEnd() {
-  document.getElementById('game-area').style.display = 'none';
-  const pct = score / questions.length;
-  const stars = pct >= 0.9 ? 5 : pct >= 0.7 ? 4 : pct >= 0.5 ? 3 : pct >= 0.3 ? 2 : 1;
-  document.getElementById('stars').textContent = '★'.repeat(stars) + '☆'.repeat(5 - stars);
-  document.getElementById('end-title').textContent = score === 10 ? "Perfect score!" : "Quiz finished!";
-  document.getElementById('end-score').textContent = `${score} / ${questions.length}`;
-  document.getElementById('end-msg').textContent =
-    score === 10 ? "You're a true EYEKON! You know everything about KATSEYE!" :
-    score >= 7 ? "Wow, you really know your KATSEYE! Amazing!" :
-    score >= 5 ? "Great job — you know loads about them!" :
-    score >= 3 ? "Good try! Play again to beat your score!" :
-    "Keep learning about KATSEYE and try again!";
-  document.getElementById('end-screen').style.display = 'block';
-}
+    document.getElementById('next-btn').onclick = () => { current++; loadQuestion(); };
+    document.getElementById('restart-btn').onclick = startQuiz;
 
-document.getElementById('next-btn').onclick = () => { current++; loadQuestion(); };
-document.getElementById('restart-btn').onclick = startQuiz;
-
-startQuiz();
-</script>
+    startQuiz();
+  </script>
 </body>
+
 </html>
