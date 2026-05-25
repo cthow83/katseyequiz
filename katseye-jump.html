@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KATSEYE Jump!</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Fredoka+One&display=swap"
+    rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: #0a1a0a;
+      background-image:
+        radial-gradient(ellipse at 20% 20%, #0d2e0d 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, #0a200a 0%, transparent 50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px 16px 40px;
+      color: white;
+      user-select: none;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 14px;
+      animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
+
+    .title {
+      font-family: 'Fredoka One', cursive;
+      font-size: clamp(1.8rem, 6vw, 2.8rem);
+      color: #86efac;
+      text-shadow: 0 0 24px rgba(34, 197, 94, 0.7), 0 2px 0 #14532d;
+    }
+
+    .subtitle {
+      font-size: 0.85rem;
+      color: #4ade80;
+      font-weight: 700;
+      margin-top: 2px;
+    }
+
+    .stats-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .stat-pill {
+      background: rgba(21, 128, 61, 0.3);
+      border: 1.5px solid rgba(34, 197, 94, 0.4);
+      border-radius: 99px;
+      padding: 5px 16px;
+      font-size: 13px;
+      font-weight: 800;
+      color: #86efac;
+    }
+
+    .stat-pill span {
+      color: #4ade80;
+      font-weight: 900;
+    }
+
+    /* GAME CANVAS AREA */
+    .game-wrap {
+      position: relative;
+      width: 100%;
+      max-width: 600px;
+      margin-bottom: 12px;
+      border-radius: 18px;
+      overflow: hidden;
+      border: 2px solid rgba(34, 197, 94, 0.3);
+      box-shadow: 0 8px 32px rgba(34, 197, 94, 0.15);
+      cursor: pointer;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      background: #0a1a0a;
+    }
+
+    .msg-bar {
+      width: 100%;
+      max-width: 600px;
+      font-size: 14px;
+      font-weight: 800;
+      color: #86efac;
+      text-align: center;
+      background: rgba(21, 128, 61, 0.2);
+      border-radius: 10px;
+      padding: 7px 16px;
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      margin-bottom: 10px;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .action-btn {
+      background: linear-gradient(135deg, #16a34a, #22c55e);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 11px 26px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 15px;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(22, 163, 74, 0.45);
+      transition: transform 0.13s;
+    }
+
+    .action-btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .action-btn:active {
+      transform: scale(0.97);
+    }
+
+    @keyframes popIn {
+      from {
+        opacity: 0;
+        transform: scale(0.8);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    /* Back button */
+    .back-btn {
+      position: fixed;
+      left: 12px;
+      top: 12px;
+      background: rgba(255, 255, 255, 0.06);
+      color: #86efac;
+      padding: 8px 12px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: 800;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      z-index: 220;
+    }
+
+    .back-btn:hover {
+      transform: translateY(-2px);
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <div class="title">KATSEYE Jump! 💚</div>
+    <div class="subtitle">Tap or click to jump over the obstacles!</div>
+  </header>
+
+  <a href="index.html" class="back-btn" aria-label="Back to index">← Back</a>
+
+  <div class="stats-row">
+    <div class="stat-pill">Score: <span id="score">0</span></div>
+    <div class="stat-pill">Best: <span id="best">0</span></div>
+    <div class="stat-pill">Lives: <span id="lives">❤️❤️❤️</span></div>
+  </div>
+
+  <div class="game-wrap" id="game-wrap">
+    <canvas id="canvas" height="220"></canvas>
+  </div>
+
+  <div class="msg-bar" id="msg-bar">Tap or click to start! 💚</div>
+
+  <div class="btn-row">
+    <button class="action-btn" onclick="restartGame()">Restart</button>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const wrap = document.getElementById('game-wrap');
+
+    // Responsive canvas
+    function resizeCanvas() {
+      canvas.width = wrap.clientWidth;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', () => { resizeCanvas(); });
+
+    // Game constants
+    const GROUND_Y = () => canvas.height - 40;
+    const GRAVITY = 0.55;
+    const JUMP_FORCE = -13;
+
+    // KATSEYE members as runner characters
+    const members = ['Yoonchae'];
+    const memberColours = ['#4ade80'];
+
+    // Game state
+    let score = 0, best = 0, lives = 3, gameState = 'idle'; // idle, running, dead, gameover
+    let frameId = null;
+    let lastTime = 0, scoreTimer = 0;
+    let speed = 5;
+
+    // Player
+    const player = {
+      x: 80,
+      y: 0,
+      w: 40,
+      h: 50,
+      vy: 0,
+      jumping: false,
+      onGround: true,
+      frame: 0,
+      frameTimer: 0,
+      memberIdx: 0,
+      invincible: 0,
+    };
+
+    // Obstacles
+    let obstacles = [];
+    let obstacleTimer = 0;
+    let nextObstacleIn = 90;
+
+    // Particles
+    let particles = [];
+
+    // Background stars
+    let bgStars = [];
+    function makeBgStars() {
+      bgStars = [];
+      for (let i = 0; i < 40; i++) {
+        bgStars.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * (GROUND_Y() - 20),
+          r: Math.random() * 1.5 + 0.5,
+          opacity: Math.random() * 0.4 + 0.1,
+        });
+      }
+    }
+
+    function resetPlayer() {
+      player.y = GROUND_Y() - player.h;
+      player.vy = 0;
+      player.jumping = false;
+      player.onGround = true;
+      player.frame = 0;
+      player.frameTimer = 0;
+      player.invincible = 0;
+      player.memberIdx = 0;
+    }
+
+    function startGame() {
+      score = 0;
+      lives = 3;
+      speed = 5;
+      obstacles = [];
+      particles = [];
+      obstacleTimer = 0;
+      nextObstacleIn = 90;
+      scoreTimer = 0;
+      gameState = 'running';
+      updateHUD();
+      resetPlayer();
+      makeBgStars();
+      document.getElementById('msg-bar').textContent = 'Jump over the obstacles! 💚';
+      if (frameId) cancelAnimationFrame(frameId);
+      lastTime = performance.now();
+      frameId = requestAnimationFrame(loop);
+    }
+
+    function restartGame() {
+      startGame();
+    }
+
+    function jump() {
+      if (gameState === 'idle' || gameState === 'gameover') {
+        startGame();
+        return;
+      }
+      if (gameState === 'dead') return;
+      if (player.onGround) {
+        player.vy = JUMP_FORCE;
+        player.onGround = false;
+        player.jumping = true;
+        spawnParticles(player.x + player.w / 2, GROUND_Y(), '#4ade80', 6);
+      }
+    }
+
+    // Input
+    document.getElementById('game-wrap').addEventListener('click', jump);
+    document.getElementById('game-wrap').addEventListener('touchstart', e => { e.preventDefault(); jump(); }, { passive: false });
+    document.addEventListener('keydown', e => { if (e.code === 'Space') { e.preventDefault(); jump(); } });
+
+    function spawnParticles(x, y, colour, count) {
+      for (let i = 0; i < count; i++) {
+        particles.push({
+          x, y,
+          vx: (Math.random() - 0.5) * 4,
+          vy: -(Math.random() * 4 + 1),
+          life: 1,
+          colour,
+          r: Math.random() * 4 + 2,
+        });
+      }
+    }
+
+    function spawnObstacle() {
+      const types = [
+        { w: 22, h: 40, colour: '#ef4444', label: '🚫' },
+        { w: 30, h: 30, colour: '#f59e0b', label: '⚠️' },
+        { w: 18, h: 55, colour: '#8b5cf6', label: '🎵' },
+      ];
+      const t = types[Math.floor(Math.random() * types.length)];
+      obstacles.push({
+        x: canvas.width + 20,
+        y: GROUND_Y() - t.h,
+        w: t.w,
+        h: t.h,
+        colour: t.colour,
+        label: t.label,
+        hit: false,
+      });
+    }
+
+    function updateHUD() {
+      document.getElementById('score').textContent = score;
+      document.getElementById('best').textContent = best;
+      const hearts = ['💔', '❤️', '❤️❤️', '❤️❤️❤️'];
+      document.getElementById('lives').textContent = hearts[lives] || '💔';
+    }
+
+    function loop(ts) {
+      const dt = Math.min(ts - lastTime, 50);
+      lastTime = ts;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      drawBackground();
+
+      if (gameState === 'running') {
+        update(dt);
+      }
+
+      drawObstacles();
+      drawPlayer();
+      drawParticles();
+      drawGround();
+
+      if (gameState === 'idle') drawStartScreen();
+      if (gameState === 'gameover') drawGameOver();
+      if (gameState === 'dead') drawDeadFlash();
+
+      frameId = requestAnimationFrame(loop);
+    }
+
+    function update(dt) {
+      // Score
+      scoreTimer += dt;
+      if (scoreTimer > 100) {
+        score++;
+        scoreTimer = 0;
+        if (score > best) best = score;
+        updateHUD();
+        // Speed up gradually
+        speed = 5 + Math.floor(score / 20) * 0.4;
+      }
+
+      // Player physics
+      player.vy += GRAVITY;
+      player.y += player.vy;
+      if (player.y >= GROUND_Y() - player.h) {
+        player.y = GROUND_Y() - player.h;
+        player.vy = 0;
+        player.onGround = true;
+        player.jumping = false;
+      }
+
+      // Player animation
+      player.frameTimer++;
+      if (player.frameTimer > 8) { player.frame = (player.frame + 1) % 2; player.frameTimer = 0; }
+
+      // Invincibility frames
+      if (player.invincible > 0) player.invincible--;
+
+      // Obstacles
+      obstacleTimer++;
+      if (obstacleTimer >= nextObstacleIn) {
+        spawnObstacle();
+        obstacleTimer = 0;
+        nextObstacleIn = 60 + Math.floor(Math.random() * 60);
+      }
+
+      for (let i = obstacles.length - 1; i >= 0; i--) {
+        obstacles[i].x -= speed;
+        if (obstacles[i].x + obstacles[i].w < 0) {
+          obstacles.splice(i, 1);
+          continue;
+        }
+
+        // Collision
+        if (!obstacles[i].hit && player.invincible === 0) {
+          const ox = obstacles[i].x, oy = obstacles[i].y, ow = obstacles[i].w, oh = obstacles[i].h;
+          const px = player.x + 6, py = player.y + 6, pw = player.w - 12, ph = player.h - 6;
+          if (px < ox + ow && px + pw > ox && py < oy + oh && py + ph > oy) {
+            obstacles[i].hit = true;
+            spawnParticles(ox + ow / 2, oy, '#ef4444', 10);
+            lives--;
+            player.invincible = 60;
+            updateHUD();
+            if (lives <= 0) {
+              gameState = 'gameover';
+              document.getElementById('msg-bar').textContent = `Game over! You scored ${score}! Tap to play again 💚`;
+            }
+          }
+        }
+      }
+
+      // Particles
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.x += p.vx; p.y += p.vy; p.vy += 0.2; p.life -= 0.04;
+        if (p.life <= 0) particles.splice(i, 1);
+      }
+    }
+
+    function drawBackground() {
+      // Sky gradient
+      const grad = ctx.createLinearGradient(0, 0, 0, GROUND_Y());
+      grad.addColorStop(0, '#030d03');
+      grad.addColorStop(1, '#0a1f0a');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Stars
+      bgStars.forEach(s => {
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(134,239,172,${s.opacity})`;
+        ctx.fill();
+      });
+
+      // Scrolling ground dots
+      ctx.fillStyle = 'rgba(34,197,94,0.07)';
+    }
+
+    function drawGround() {
+      // Ground line
+      const gy = GROUND_Y();
+      ctx.fillStyle = '#14532d';
+      ctx.fillRect(0, gy, canvas.width, canvas.height - gy);
+
+      // Ground shine
+      const grad = ctx.createLinearGradient(0, gy, 0, gy + 8);
+      grad.addColorStop(0, 'rgba(74,222,128,0.4)');
+      grad.addColorStop(1, 'transparent');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, gy, canvas.width, 8);
+    }
+
+    function drawPlayer() {
+      const px = player.x, py = player.y, pw = player.w, ph = player.h;
+
+      // Invincibility flash
+      if (player.invincible > 0 && Math.floor(player.invincible / 5) % 2 === 0) return;
+
+      const colour = memberColours[player.memberIdx];
+      const name = members[player.memberIdx];
+
+      // Shadow
+      ctx.fillStyle = 'rgba(0,0,0,0.25)';
+      ctx.beginPath();
+      ctx.ellipse(px + pw / 2, GROUND_Y() + 2, pw / 2, 5, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Body
+      ctx.fillStyle = colour;
+      ctx.beginPath();
+      ctx.roundRect(px + 4, py + 16, pw - 8, ph - 16, 6);
+      ctx.fill();
+
+      // Head
+      ctx.fillStyle = '#fde68a';
+      ctx.beginPath();
+      ctx.arc(px + pw / 2, py + 12, 13, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Hair
+      ctx.fillStyle = '#1a0a00';
+      ctx.beginPath();
+      ctx.arc(px + pw / 2, py + 6, 12, Math.PI, 0);
+      ctx.fill();
+
+      // Eyes
+      ctx.fillStyle = '#1a1a1a';
+      ctx.beginPath();
+      ctx.arc(px + pw / 2 - 4, py + 12, 2, 0, Math.PI * 2);
+      ctx.arc(px + pw / 2 + 4, py + 12, 2, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Smile
+      ctx.strokeStyle = '#92400e';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(px + pw / 2, py + 15, 4, 0.2, Math.PI - 0.2);
+      ctx.stroke();
+
+      // Legs (animated)
+      ctx.fillStyle = colour;
+      const legOffset = player.onGround ? (player.frame === 0 ? 4 : -4) : 0;
+      ctx.fillRect(px + 8, py + ph - 16, 10, 16 + legOffset);
+      ctx.fillRect(px + pw - 18, py + ph - 16, 10, 16 - legOffset);
+
+      // Name tag
+      ctx.fillStyle = 'rgba(0,0,0,0.5)';
+      ctx.beginPath();
+      ctx.roundRect(px - 2, py - 16, pw + 4, 14, 4);
+      ctx.fill();
+      ctx.fillStyle = colour;
+      ctx.font = 'bold 9px Nunito';
+      ctx.textAlign = 'center';
+      ctx.fillText(name.toUpperCase(), px + pw / 2, py - 5);
+      ctx.textAlign = 'left';
+    }
+
+    function drawObstacles() {
+      obstacles.forEach(ob => {
+        // Glow
+        ctx.shadowColor = ob.colour;
+        ctx.shadowBlur = 12;
+        ctx.fillStyle = ob.colour;
+        ctx.beginPath();
+        ctx.roundRect(ob.x, ob.y, ob.w, ob.h, 6);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+
+        // Label
+        ctx.font = `${Math.min(ob.w, 20)}px serif`;
+        ctx.textAlign = 'center';
+        ctx.fillText(ob.label, ob.x + ob.w / 2, ob.y + ob.h / 2 + 6);
+        ctx.textAlign = 'left';
+      });
+    }
+
+    function drawParticles() {
+      particles.forEach(p => {
+        ctx.globalAlpha = p.life;
+        ctx.fillStyle = p.colour;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      ctx.globalAlpha = 1;
+    }
+
+    function drawStartScreen() {
+      ctx.fillStyle = 'rgba(0,0,0,0.6)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = '#86efac';
+      ctx.font = `bold ${clamp(22, 28, canvas.width / 18)}px Fredoka One`;
+      ctx.textAlign = 'center';
+      ctx.fillText('KATSEYE Jump! 💚', canvas.width / 2, canvas.height / 2 - 24);
+
+      ctx.fillStyle = '#4ade80';
+      ctx.font = `bold ${clamp(13, 16, canvas.width / 25)}px Nunito`;
+      ctx.fillText('Tap or click to start!', canvas.width / 2, canvas.height / 2 + 10);
+      ctx.textAlign = 'left';
+    }
+
+    function drawGameOver() {
+      ctx.fillStyle = 'rgba(0,0,0,0.65)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = '#86efac';
+      ctx.font = `bold ${clamp(22, 30, canvas.width / 16)}px Fredoka One`;
+      ctx.textAlign = 'center';
+      ctx.fillText('Game Over! 💔', canvas.width / 2, canvas.height / 2 - 30);
+
+      ctx.font = `bold ${clamp(14, 18, canvas.width / 22)}px Nunito`;
+      ctx.fillStyle = '#4ade80';
+      ctx.fillText(`Score: ${score}`, canvas.width / 2, canvas.height / 2 + 2);
+      ctx.fillText(`Best: ${best}`, canvas.width / 2, canvas.height / 2 + 26);
+
+      ctx.font = `bold ${clamp(12, 14, canvas.width / 28)}px Nunito`;
+      ctx.fillStyle = '#86efac';
+      ctx.fillText('Tap to play again!', canvas.width / 2, canvas.height / 2 + 54);
+      ctx.textAlign = 'left';
+    }
+
+    function drawDeadFlash() { }
+
+    function clamp(min, max, val) {
+      return Math.max(min, Math.min(max, val));
+    }
+
+    // Init
+    makeBgStars();
+    resizeCanvas();
+    frameId = requestAnimationFrame(loop);
+  </script>
+</body>
+
+</html>

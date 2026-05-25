@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Yarn Cat Jump!</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Fredoka+One&display=swap"
+    rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: #0a1a0a;
+      background-image:
+        radial-gradient(ellipse at 20% 20%, #0d2e0d 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, #0a200a 0%, transparent 50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px 16px 40px;
+      color: white;
+      user-select: none;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 12px;
+      animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
+
+    .title {
+      font-family: 'Fredoka One', cursive;
+      font-size: clamp(1.8rem, 6vw, 2.8rem);
+      color: #86efac;
+      text-shadow: 0 0 24px rgba(34, 197, 94, 0.7), 0 2px 0 #14532d;
+    }
+
+    .subtitle {
+      font-size: 0.85rem;
+      color: #4ade80;
+      font-weight: 700;
+      margin-top: 2px;
+    }
+
+    .stats-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .stat-pill {
+      background: rgba(21, 128, 61, 0.3);
+      border: 1.5px solid rgba(34, 197, 94, 0.4);
+      border-radius: 99px;
+      padding: 5px 16px;
+      font-size: 13px;
+      font-weight: 800;
+      color: #86efac;
+    }
+
+    .stat-pill span {
+      color: #4ade80;
+      font-weight: 900;
+    }
+
+    .game-wrap {
+      position: relative;
+      width: 100%;
+      max-width: 420px;
+      margin-bottom: 12px;
+      border-radius: 18px;
+      overflow: hidden;
+      border: 2px solid rgba(34, 197, 94, 0.3);
+      box-shadow: 0 8px 32px rgba(34, 197, 94, 0.15);
+      cursor: pointer;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+    }
+
+    .msg-bar {
+      width: 100%;
+      max-width: 420px;
+      font-size: 14px;
+      font-weight: 800;
+      color: #86efac;
+      text-align: center;
+      background: rgba(21, 128, 61, 0.2);
+      border-radius: 10px;
+      padding: 7px 16px;
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      margin-bottom: 10px;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .action-btn {
+      background: linear-gradient(135deg, #16a34a, #22c55e);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 11px 26px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 15px;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(22, 163, 74, 0.45);
+      transition: transform 0.13s;
+    }
+
+    .action-btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .action-btn:active {
+      transform: scale(0.97);
+    }
+
+    @keyframes popIn {
+      from {
+        opacity: 0;
+        transform: scale(0.8);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    /* Back button */
+    .back-btn {
+      position: fixed;
+      left: 12px;
+      top: 12px;
+      background: rgba(255, 255, 255, 0.06);
+      color: #86efac;
+      padding: 8px 12px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: 800;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      z-index: 220;
+    }
+
+    .back-btn:hover {
+      transform: translateY(-2px);
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <div class="title">Yarn Cat Jump! 🧶💚</div>
+    <div class="subtitle">Jump and collect all the yarn balls!</div>
+  </header>
+
+  <a href="index.html" class="back-btn" aria-label="Back to index">← Back</a>
+
+  <div class="stats-row">
+    <div class="stat-pill">Score: <span id="score">0</span></div>
+    <div class="stat-pill">Best: <span id="best">0</span></div>
+    <div class="stat-pill">Lives: <span id="lives">❤️❤️❤️</span></div>
+    <div class="stat-pill">🧶 <span id="yarn-count">0</span></div>
+  </div>
+
+  <div class="game-wrap" id="game-wrap">
+    <canvas id="canvas" width="420" height="420"></canvas>
+  </div>
+
+  <div class="msg-bar" id="msg-bar">Tap or click to jump! Collect the yarn balls! 🧶</div>
+  <div class="btn-row">
+    <button class="action-btn" onclick="restartGame()">Restart</button>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const W = 420, H = 420;
+
+    const GRAVITY = 0.55;
+    const JUMP = -12;
+    const PLATFORM_SPEED = 2.8;
+    const PLATFORM_W_MIN = 120, PLATFORM_W_MAX = 180;
+    const PLATFORM_GAP_MIN = 150, PLATFORM_GAP_MAX = 190;
+
+    let score = 0, best = 0, lives = 3, yarnCount = 0;
+    let gameState = 'idle'; // idle, running, dead
+    let frameId = null, frameCount = 0, scoreTimer = 0;
+
+    // Cat
+    const cat = {
+      x: 60, y: 200,
+      w: 42, h: 38,
+      vy: 0,
+      onGround: false,
+      frame: 0, frameTimer: 0,
+      invincible: 0,
+      jumpCount: 0, // allow double jump
+    };
+
+    // Platforms
+    let platforms = [];
+
+    // Yarn balls
+    let yarns = [];
+
+    // Particles
+    let particles = [];
+
+    // Background stars
+    let bgStars = [];
+    function makeStars() {
+      bgStars = [];
+      for (let i = 0; i < 40; i++) {
+        bgStars.push({ x: Math.random() * W, y: Math.random() * H, r: Math.random() * 1.5 + 0.3, op: Math.random() * 0.4 + 0.1 });
+      }
+    }
+
+    const YARN_COLOURS = ['#ef4444', '#f97316', '#eab308', '#a855f7', '#ec4899', '#3b82f6'];
+
+    function initPlatforms() {
+      platforms = [];
+      yarns = [];
+      // Starting platform under cat
+      platforms.push({ x: 10, y: 260, w: 130, h: 14 });
+
+      // Generate platforms ahead
+      let lastX = 140, lastY = 260;
+      for (let i = 0; i < 8; i++) {
+        const gap = PLATFORM_GAP_MIN + Math.random() * (PLATFORM_GAP_MAX - PLATFORM_GAP_MIN);
+        const w = PLATFORM_W_MIN + Math.random() * (PLATFORM_W_MAX - PLATFORM_W_MIN);
+        const y = Math.max(80, Math.min(340, lastY + (Math.random() - 0.5) * 120));
+        lastX += gap;
+        platforms.push({ x: lastX, y, w, h: 14 });
+        // Maybe add a yarn ball above this platform
+        if (Math.random() > 0.3) {
+          yarns.push({ x: lastX + w / 2, y: y - 36, collected: false, colour: YARN_COLOURS[Math.floor(Math.random() * YARN_COLOURS.length)], bob: Math.random() * Math.PI * 2 });
+        }
+        lastY = y;
+      }
+    }
+
+    function resetCat() {
+      cat.x = 60;
+      cat.y = 222; // on first platform
+      cat.vy = 0;
+      cat.onGround = true;
+      cat.frame = 0;
+      cat.frameTimer = 0;
+      cat.invincible = 0;
+      cat.jumpCount = 0;
+    }
+
+    function startGame() {
+      score = 0; lives = 3; frameCount = 0; scoreTimer = 0;
+      particles = [];
+      gameState = 'running';
+      yarnCount = 0;
+      document.getElementById('yarn-count').textContent = 0;
+      updateHUD();
+      initPlatforms();
+      resetCat();
+      makeStars();
+      document.getElementById('msg-bar').textContent = 'Collect the yarn balls! 🧶';
+      if (frameId) cancelAnimationFrame(frameId);
+      frameId = requestAnimationFrame(loop);
+    }
+
+    function restartGame() { startGame(); }
+
+    function doJump() {
+      if (gameState === 'idle' || gameState === 'dead') { startGame(); return; }
+      if (gameState !== 'running') return;
+      if (cat.onGround || cat.jumpCount < 2) {
+        cat.vy = JUMP;
+        cat.onGround = false;
+        cat.jumpCount++;
+        spawnParticles(cat.x + cat.w / 2, cat.y + cat.h, '#4ade80', 6);
+      }
+    }
+
+    document.getElementById('game-wrap').addEventListener('click', doJump);
+    document.getElementById('game-wrap').addEventListener('touchstart', e => { e.preventDefault(); doJump(); }, { passive: false });
+    document.addEventListener('keydown', e => { if (e.code === 'Space') { e.preventDefault(); doJump(); } });
+
+    function spawnParticles(x, y, colour, count) {
+      for (let i = 0; i < count; i++) {
+        particles.push({
+          x, y,
+          vx: (Math.random() - 0.5) * 5,
+          vy: -(Math.random() * 4 + 1),
+          life: 1,
+          colour: typeof colour === 'string' ? colour : YARN_COLOURS[Math.floor(Math.random() * YARN_COLOURS.length)],
+          r: Math.random() * 4 + 2,
+        });
+      }
+    }
+
+    function updateHUD() {
+      document.getElementById('score').textContent = score;
+      document.getElementById('best').textContent = best;
+      const h = ['💔', '❤️', '❤️❤️', '❤️❤️❤️'];
+      document.getElementById('lives').textContent = h[lives] || '💔';
+    }
+
+    function loop() {
+      ctx.clearRect(0, 0, W, H);
+      drawBackground();
+
+      if (gameState === 'running') update();
+
+      drawPlatforms();
+      drawYarns();
+      drawParticles();
+      drawCat();
+
+      if (gameState === 'idle') drawScreen('Yarn Cat Jump! 🧶', 'Tap or click to start!');
+      if (gameState === 'dead') drawScreen('Game Over! 💔', `Score: ${score}  Best: ${best}\nTap to play again!`);
+
+      frameId = requestAnimationFrame(loop);
+    }
+
+    function update() {
+      frameCount++;
+
+      // Score over time
+      scoreTimer += 16;
+      if (scoreTimer > 800) { scoreTimer = 0; score++; if (score > best) best = score; updateHUD(); }
+
+      // Cat physics
+      cat.vy += GRAVITY;
+      cat.y += cat.vy;
+      cat.frameTimer++;
+      if (cat.frameTimer > 7) { cat.frame = (cat.frame + 1) % 2; cat.frameTimer = 0; }
+      if (cat.invincible > 0) cat.invincible--;
+
+      // Check fallen off bottom
+      if (cat.y > H + 60) {
+        lives = Math.max(0, lives - 1);
+        updateHUD();
+        if (lives <= 0) { gameState = 'dead'; document.getElementById('msg-bar').textContent = `Game over! You scored ${score}! Tap to play again 💚`; return; }
+        // Respawn on nearest platform
+        const plat = platforms.find(p => p.x < cat.x + 100 && p.x + p.w > cat.x - 40) || platforms[0];
+        cat.y = plat ? plat.y - cat.h : 200;
+        cat.vy = 0;
+        cat.invincible = 80;
+      }
+
+      // Scroll everything left
+      const scroll = PLATFORM_SPEED;
+      platforms.forEach(p => p.x -= scroll);
+      yarns.forEach(y => { y.x -= scroll; y.bob += 0.07; });
+
+      // Platform collision
+      cat.onGround = false;
+      platforms.forEach(p => {
+        if (cat.vy >= 0 &&
+          cat.x + cat.w - 6 > p.x &&
+          cat.x + 6 < p.x + p.w &&
+          cat.y + cat.h > p.y &&
+          cat.y + cat.h < p.y + p.h + 14) {
+          cat.y = p.y - cat.h;
+          cat.vy = 0;
+          cat.onGround = true;
+          cat.jumpCount = 0;
+        }
+      });
+
+      // Yarn collection
+      yarns.forEach(y => {
+        if (!y.collected) {
+          const bobY = y.y + Math.sin(y.bob) * 5;
+          if (cat.x + cat.w - 4 > y.x - 14 &&
+            cat.x + 4 < y.x + 14 &&
+            cat.y + cat.h - 4 > bobY - 14 &&
+            cat.y + 4 < bobY + 14) {
+            y.collected = true;
+            score += 5;
+            yarnCount++;
+            if (score > best) best = score;
+            document.getElementById('yarn-count').textContent = yarnCount;
+            updateHUD();
+            spawnParticles(y.x, bobY, y.colour, 12);
+            document.getElementById('msg-bar').textContent = ['Nice catch! 🧶', 'Got it! 💚', 'Purrfect! 😸', 'Meow! 🧶'][Math.floor(Math.random() * 4)];
+          }
+        }
+      });
+
+      // Remove off-screen
+      platforms = platforms.filter(p => p.x + p.w > -20);
+      yarns = yarns.filter(y => y.x > -40);
+
+      // Generate new platforms
+      const lastPlat = platforms[platforms.length - 1];
+      if (lastPlat && lastPlat.x < W + 100) {
+        const gap = PLATFORM_GAP_MIN + Math.random() * (PLATFORM_GAP_MAX - PLATFORM_GAP_MIN);
+        const w = PLATFORM_W_MIN + Math.random() * (PLATFORM_W_MAX - PLATFORM_W_MIN);
+        const y = Math.max(80, Math.min(340, lastPlat.y + (Math.random() - 0.5) * 120));
+        const newX = lastPlat.x + lastPlat.w + gap;
+        platforms.push({ x: newX, y, w, h: 14 });
+        if (Math.random() > 0.25) {
+          yarns.push({ x: newX + w / 2, y: y - 36, collected: false, colour: YARN_COLOURS[Math.floor(Math.random() * YARN_COLOURS.length)], bob: Math.random() * Math.PI * 2 });
+        }
+      }
+
+      // Particles
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.x += p.vx; p.y += p.vy; p.vy += 0.2; p.life -= 0.04;
+        if (p.life <= 0) particles.splice(i, 1);
+      }
+
+      // Scroll bg stars
+      bgStars.forEach(s => { s.x -= 0.4; if (s.x < 0) { s.x = W; s.y = Math.random() * H; } });
+    }
+
+    function drawBackground() {
+      const grad = ctx.createLinearGradient(0, 0, 0, H);
+      grad.addColorStop(0, '#030d03');
+      grad.addColorStop(1, '#0a1f0a');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, W, H);
+      bgStars.forEach(s => {
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(134,239,172,${s.op})`;
+        ctx.fill();
+      });
+    }
+
+    function drawPlatforms() {
+      platforms.forEach(p => {
+        // Shadow
+        ctx.fillStyle = 'rgba(0,0,0,0.3)';
+        ctx.beginPath();
+        ctx.roundRect(p.x + 4, p.y + 6, p.w, p.h, 8);
+        ctx.fill();
+
+        // Platform body
+        const grad = ctx.createLinearGradient(p.x, p.y, p.x, p.y + p.h);
+        grad.addColorStop(0, '#22c55e');
+        grad.addColorStop(1, '#15803d');
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.roundRect(p.x, p.y, p.w, p.h, 8);
+        ctx.fill();
+
+        // Shine
+        ctx.fillStyle = 'rgba(255,255,255,0.18)';
+        ctx.beginPath();
+        ctx.roundRect(p.x + 6, p.y + 2, p.w - 12, 5, 4);
+        ctx.fill();
+
+        // Grass tufts
+        ctx.fillStyle = '#4ade80';
+        for (let i = 0; i < 3; i++) {
+          const tx = p.x + 10 + i * (p.w - 20) / 2;
+          ctx.beginPath();
+          ctx.arc(tx, p.y, 5, Math.PI, 0);
+          ctx.fill();
+        }
+      });
+    }
+
+    function drawYarns() {
+      yarns.forEach(y => {
+        if (y.collected) return;
+        const by = y.y + Math.sin(y.bob) * 5;
+
+        // Glow
+        ctx.shadowColor = y.colour;
+        ctx.shadowBlur = 12;
+
+        // Ball body
+        ctx.fillStyle = y.colour;
+        ctx.beginPath();
+        ctx.arc(y.x, by, 13, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+
+        // Yarn lines
+        ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.arc(y.x, by, 9, 0.5, 2.5);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(y.x, by, 5, 1, 3.5);
+        ctx.stroke();
+
+        // Tail
+        ctx.strokeStyle = y.colour;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(y.x + 9, by - 5);
+        ctx.quadraticCurveTo(y.x + 18, by - 16, y.x + 14, by - 22);
+        ctx.stroke();
+      });
+      ctx.shadowBlur = 0;
+    }
+
+    function drawCat() {
+      const x = cat.x, y = cat.y, w = cat.w, h = cat.h;
+      if (cat.invincible > 0 && Math.floor(cat.invincible / 5) % 2 === 0) return;
+
+      // Shadow
+      ctx.fillStyle = 'rgba(0,0,0,0.25)';
+      ctx.beginPath();
+      ctx.ellipse(x + w / 2, y + h + 3, w / 2 - 4, 5, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Body
+      const bodyGrad = ctx.createLinearGradient(x, y, x + w, y + h);
+      bodyGrad.addColorStop(0, '#86efac');
+      bodyGrad.addColorStop(1, '#4ade80');
+      ctx.fillStyle = bodyGrad;
+      ctx.beginPath();
+      ctx.roundRect(x + 4, y + 14, w - 8, h - 14, 10);
+      ctx.fill();
+
+      // Belly
+      ctx.fillStyle = '#dcfce7';
+      ctx.beginPath();
+      ctx.ellipse(x + w / 2, y + h - 10, 8, 7, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Head
+      ctx.fillStyle = '#86efac';
+      ctx.beginPath();
+      ctx.arc(x + w / 2, y + 12, 14, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Ears
+      ctx.fillStyle = '#22c55e';
+      ctx.beginPath();
+      ctx.moveTo(x + 8, y + 4); ctx.lineTo(x + 13, y - 9); ctx.lineTo(x + 19, y + 4);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(x + w - 8, y + 4); ctx.lineTo(x + w - 13, y - 9); ctx.lineTo(x + w - 19, y + 4);
+      ctx.fill();
+
+      // Inner ears
+      ctx.fillStyle = '#f9a8d4';
+      ctx.beginPath();
+      ctx.moveTo(x + 10, y + 3); ctx.lineTo(x + 13, y - 5); ctx.lineTo(x + 17, y + 3);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(x + w - 10, y + 3); ctx.lineTo(x + w - 13, y - 5); ctx.lineTo(x + w - 17, y + 3);
+      ctx.fill();
+
+      // Eyes — big cute ones
+      ctx.fillStyle = '#052e16';
+      ctx.beginPath();
+      ctx.ellipse(x + w / 2 - 5, y + 11, 3.5, 4, 0, 0, Math.PI * 2);
+      ctx.ellipse(x + w / 2 + 5, y + 11, 3.5, 4, 0, 0, Math.PI * 2);
+      ctx.fill();
+      // Shine
+      ctx.fillStyle = 'white';
+      ctx.beginPath();
+      ctx.arc(x + w / 2 - 4, y + 9, 1.3, 0, Math.PI * 2);
+      ctx.arc(x + w / 2 + 6, y + 9, 1.3, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Nose
+      ctx.fillStyle = '#f472b6';
+      ctx.beginPath();
+      ctx.moveTo(x + w / 2, y + 15); ctx.lineTo(x + w / 2 - 2, y + 13); ctx.lineTo(x + w / 2 + 2, y + 13);
+      ctx.fill();
+
+      // Whiskers
+      ctx.strokeStyle = 'rgba(5,46,22,0.4)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(x + w / 2 - 4, y + 15); ctx.lineTo(x + 2, y + 13);
+      ctx.moveTo(x + w / 2 - 4, y + 16); ctx.lineTo(x + 2, y + 18);
+      ctx.moveTo(x + w / 2 + 4, y + 15); ctx.lineTo(x + w - 2, y + 13);
+      ctx.moveTo(x + w / 2 + 4, y + 16); ctx.lineTo(x + w - 2, y + 18);
+      ctx.stroke();
+
+      // Legs
+      const legOff = cat.onGround ? (cat.frame === 0 ? 3 : -3) : 0;
+      ctx.fillStyle = '#4ade80';
+      ctx.beginPath();
+      ctx.roundRect(x + 7, y + h - 12, 10, 12 + legOff, 4); ctx.fill();
+      ctx.beginPath();
+      ctx.roundRect(x + w - 17, y + h - 12, 10, 12 - legOff, 4); ctx.fill();
+
+      // Tail
+      ctx.strokeStyle = '#22c55e';
+      ctx.lineWidth = 5; ctx.lineCap = 'round';
+      ctx.beginPath();
+      const tailWag = cat.onGround ? Math.sin(Date.now() / 180) * 8 : -8;
+      ctx.moveTo(x + w - 4, y + h - 8);
+      ctx.quadraticCurveTo(x + w + 16, y + h - 16, x + w + 12, y + h - 28 + tailWag);
+      ctx.stroke();
+      ctx.lineCap = 'butt';
+    }
+
+    function drawParticles() {
+      particles.forEach(p => {
+        ctx.globalAlpha = p.life;
+        ctx.fillStyle = p.colour;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      ctx.globalAlpha = 1;
+    }
+
+    function drawScreen(title, sub) {
+      ctx.fillStyle = 'rgba(0,0,0,0.65)';
+      ctx.fillRect(0, 0, W, H);
+      ctx.fillStyle = '#86efac';
+      ctx.font = 'bold 26px Fredoka One';
+      ctx.textAlign = 'center';
+      ctx.fillText(title, W / 2, H / 2 - 28);
+      ctx.font = 'bold 15px Nunito';
+      ctx.fillStyle = '#4ade80';
+      const lines = sub.split('\n');
+      lines.forEach((l, i) => ctx.fillText(l, W / 2, H / 2 + 8 + i * 24));
+      ctx.textAlign = 'left';
+    }
+
+    makeStars();
+    frameId = requestAnimationFrame(loop);
+  </script>
+</body>
+
+</html>

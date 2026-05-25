@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flappy Yoonchae!</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Fredoka+One&display=swap"
+    rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: #1a0011;
+      background-image:
+        radial-gradient(ellipse at 20% 20%, #3d0025 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, #2d0018 0%, transparent 50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px 16px 40px;
+      color: white;
+      user-select: none;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 12px;
+      animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
+
+    .title {
+      font-family: 'Fredoka One', cursive;
+      font-size: clamp(1.8rem, 6vw, 2.8rem);
+      color: #fbcfe8;
+      text-shadow: 0 0 24px rgba(236, 72, 153, 0.8), 0 2px 0 #831843;
+    }
+
+    .subtitle {
+      font-size: 0.85rem;
+      color: #f472b6;
+      font-weight: 700;
+      margin-top: 2px;
+    }
+
+    .stats-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .stat-pill {
+      background: rgba(190, 24, 93, 0.3);
+      border: 1.5px solid rgba(236, 72, 153, 0.4);
+      border-radius: 99px;
+      padding: 5px 16px;
+      font-size: 13px;
+      font-weight: 800;
+      color: #fbcfe8;
+    }
+
+    .stat-pill span {
+      color: #f472b6;
+      font-weight: 900;
+    }
+
+    .game-wrap {
+      position: relative;
+      width: 100%;
+      max-width: 400px;
+      margin-bottom: 12px;
+      border-radius: 18px;
+      overflow: hidden;
+      border: 2px solid rgba(236, 72, 153, 0.4);
+      box-shadow: 0 8px 32px rgba(219, 39, 119, 0.25);
+      cursor: pointer;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+    }
+
+    .msg-bar {
+      width: 100%;
+      max-width: 400px;
+      font-size: 14px;
+      font-weight: 800;
+      color: #fbcfe8;
+      text-align: center;
+      background: rgba(190, 24, 93, 0.2);
+      border-radius: 10px;
+      padding: 7px 16px;
+      border: 1px solid rgba(236, 72, 153, 0.3);
+      margin-bottom: 10px;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .action-btn {
+      background: linear-gradient(135deg, #db2777, #ec4899);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 11px 26px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 15px;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(219, 39, 119, 0.45);
+      transition: transform 0.13s;
+    }
+
+    .action-btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .action-btn:active {
+      transform: scale(0.97);
+    }
+
+    @keyframes popIn {
+      from {
+        opacity: 0;
+        transform: scale(0.8);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    /* Back button */
+    .back-btn {
+      position: fixed;
+      left: 12px;
+      top: 12px;
+      background: rgba(255, 255, 255, 0.06);
+      color: #fbcfe8;
+      padding: 8px 12px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: 800;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      z-index: 220;
+    }
+
+    .back-btn:hover {
+      transform: translateY(-2px);
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <div class="title">Flappy Yoonchae! 🩷</div>
+    <div class="subtitle">Tap or click to fly through the gaps!</div>
+  </header>
+
+  <a href="index.html" class="back-btn" aria-label="Back to index">← Back</a>
+
+  <div class="stats-row">
+    <div class="stat-pill">Score: <span id="score">0</span></div>
+    <div class="stat-pill">Best: <span id="best">0</span></div>
+  </div>
+
+  <div class="game-wrap" id="game-wrap">
+    <canvas id="canvas" width="400" height="500"></canvas>
+  </div>
+
+  <div class="msg-bar" id="msg-bar">Tap or click to start! 🩷</div>
+  <div class="btn-row">
+    <button class="action-btn" onclick="restartGame()">Restart</button>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+
+    const W = 400, H = 500;
+    const GRAVITY = 0.35;
+    const FLAP = -7.5;
+    const PIPE_W = 58;
+    const GAP = 200;
+    const PIPE_SPEED = 1.8;
+    const PIPE_INTERVAL = 130; // frames
+
+    let score = 0, best = 0, gameState = 'idle'; // idle, running, dead
+    let frameId = null, frameCount = 0;
+
+    // Yoonchae character
+    const yoon = {
+      x: 80, y: H / 2,
+      w: 44, h: 52,
+      vy: 0,
+      rotation: 0,
+      frame: 0, frameTimer: 0,
+    };
+
+    // Pipes / obstacles
+    let pipes = [];
+
+    // Particles
+    let particles = [];
+
+    // Background sparkles
+    let sparkles = [];
+    function makeSparkles() {
+      sparkles = [];
+      for (let i = 0; i < 50; i++) {
+        sparkles.push({
+          x: Math.random() * W,
+          y: Math.random() * H,
+          r: Math.random() * 1.5 + 0.5,
+          opacity: Math.random() * 0.5 + 0.1,
+          speed: Math.random() * 0.3 + 0.1,
+        });
+      }
+    }
+
+    // Music industry obstacles
+    const obstacleTypes = [
+      { emoji: '💿', label: 'Record' },
+      { emoji: '🎵', label: 'Notes' },
+      { emoji: '🎤', label: 'Mic' },
+      { emoji: '🎸', label: 'Guitar' },
+      { emoji: '🎹', label: 'Piano' },
+      { emoji: '📀', label: 'CD' },
+      { emoji: '🔊', label: 'Speaker' },
+      { emoji: '🎙️', label: 'Studio Mic' },
+    ];
+
+    function resetYoon() {
+      yoon.y = H / 2 - 20;
+      yoon.vy = 0;
+      yoon.rotation = 0;
+      yoon.frame = 0;
+      yoon.frameTimer = 0;
+    }
+
+    function startGame() {
+      score = 0;
+      pipes = [];
+      particles = [];
+      frameCount = 0;
+      gameState = 'running';
+      document.getElementById('score').textContent = 0;
+      document.getElementById('msg-bar').textContent = 'Fly through the gaps! 🩷';
+      resetYoon();
+      makeSparkles();
+      if (frameId) cancelAnimationFrame(frameId);
+      frameId = requestAnimationFrame(loop);
+    }
+
+    function restartGame() { startGame(); }
+
+    let deathTime = 0;
+
+    function flap() {
+      if (gameState === 'idle') {
+        // First click — jump off platform
+        gameState = 'ready';
+        yoon.vy = FLAP;
+        document.getElementById('msg-bar').textContent = 'Tap again to start! 🩷';
+        return;
+      }
+      if (gameState === 'ready') {
+        // Second click — start the game
+        startGame();
+        return;
+      }
+      if (gameState === 'dead') {
+        if (Date.now() - deathTime < 1200) return;
+        startGame();
+        return;
+      }
+      if (gameState === 'running') {
+        yoon.vy = FLAP;
+        spawnParticles(yoon.x, yoon.y + yoon.h / 2, 5);
+      }
+    }
+
+    document.getElementById('game-wrap').addEventListener('click', flap);
+    document.getElementById('game-wrap').addEventListener('touchstart', e => { e.preventDefault(); flap(); }, { passive: false });
+    document.addEventListener('keydown', e => { if (e.code === 'Space') { e.preventDefault(); flap(); } });
+
+    function spawnParticles(x, y, count) {
+      for (let i = 0; i < count; i++) {
+        particles.push({
+          x, y,
+          vx: (Math.random() - 0.5) * 4,
+          vy: (Math.random() - 0.5) * 4,
+          life: 1,
+          colour: ['#fbcfe8', '#f9a8d4', '#f472b6', '#ec4899'][Math.floor(Math.random() * 4)],
+          r: Math.random() * 4 + 2,
+        });
+      }
+    }
+
+    function spawnPipe() {
+      const minH = 60, maxH = H - GAP - 60;
+      const topH = minH + Math.random() * (maxH - minH);
+      const type = obstacleTypes[Math.floor(Math.random() * obstacleTypes.length)];
+      pipes.push({ x: W + 10, topH, scored: false, type });
+    }
+
+    function loop() {
+      ctx.clearRect(0, 0, W, H);
+      drawBackground();
+
+      if (gameState === 'running') update();
+      if (gameState === 'ready') {
+        yoon.vy += GRAVITY;
+        yoon.y += yoon.vy;
+        yoon.rotation = Math.max(-25, Math.min(70, yoon.vy * 3.5));
+        if (yoon.y + yoon.h >= H) { yoon.y = H - yoon.h; yoon.vy = 0; }
+        if (yoon.y <= 0) { yoon.y = 0; yoon.vy = 0; }
+      }
+
+      drawPipes();
+      drawParticles();
+      drawYoonchae();
+
+      if (gameState === 'idle') { drawPlatform(); drawScreen('Flappy Yoonchae! 🩷', 'Tap or click to start!', ''); }
+      if (gameState === 'ready') { drawScreen('', 'Tap again to start! 🩷', ''); }
+      if (gameState === 'dead') { drawPlatform(); drawScreen('Game Over! 💔', `Score: ${score}`, `Best: ${best}\nTap to try again!`); }
+
+      frameId = requestAnimationFrame(loop);
+    }
+
+    function update() {
+      frameCount++;
+
+      // Physics
+      yoon.vy += GRAVITY;
+      yoon.y += yoon.vy;
+      yoon.rotation = Math.max(-25, Math.min(70, yoon.vy * 3.5));
+
+      // Yoon animation
+      yoon.frameTimer++;
+      if (yoon.frameTimer > 8) { yoon.frame = (yoon.frame + 1) % 3; yoon.frameTimer = 0; }
+
+      // Ceiling / floor
+      if (yoon.y <= 0) { yoon.y = 0; yoon.vy = 0; }
+      if (yoon.y + yoon.h >= H) { die(); return; }
+
+      // Spawn pipes
+      if (frameCount % PIPE_INTERVAL === 0) spawnPipe();
+
+      // Move pipes
+      for (let i = pipes.length - 1; i >= 0; i--) {
+        pipes[i].x -= PIPE_SPEED;
+
+        // Score
+        if (!pipes[i].scored && pipes[i].x + PIPE_W < yoon.x) {
+          pipes[i].scored = true;
+          score++;
+          document.getElementById('score').textContent = score;
+          if (score > best) { best = score; document.getElementById('best').textContent = best; }
+          spawnParticles(yoon.x + yoon.w / 2, yoon.y, 8);
+        }
+
+        // Remove off-screen
+        if (pipes[i].x + PIPE_W < 0) { pipes.splice(i, 1); continue; }
+
+        // Collision
+        const px = pipes[i].x, topH = pipes[i].topH, botY = topH + GAP;
+        const yx = yoon.x + 6, yy = yoon.y + 6, yw = yoon.w - 12, yh = yoon.h - 10;
+        if (yx < px + PIPE_W && yx + yw > px) {
+          if (yy < topH || yy + yh > botY) { die(); return; }
+        }
+      }
+
+      // Sparkles
+      sparkles.forEach(s => { s.x -= s.speed; if (s.x < 0) { s.x = W; s.y = Math.random() * H; } });
+
+      // Particles
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.x += p.vx; p.y += p.vy; p.life -= 0.05;
+        if (p.life <= 0) particles.splice(i, 1);
+      }
+    }
+
+    function die() {
+      gameState = 'dead';
+      spawnParticles(yoon.x + yoon.w / 2, yoon.y + yoon.h / 2, 20);
+      yoon.y = H / 2 - 20;
+      yoon.vy = 0;
+      yoon.rotation = 0;
+      deathTime = Date.now();
+      document.getElementById('msg-bar').textContent = `Game over! You scored ${score}! Tap to try again 🩷`;
+    }
+
+    function drawPlatform() {
+      const px = yoon.x - 10;
+      const py = yoon.y + yoon.h;
+      const pw = yoon.w + 20;
+      const ph = 14;
+
+      // Stage glow
+      ctx.shadowColor = '#f472b6';
+      ctx.shadowBlur = 18;
+
+      // Platform body
+      const grad = ctx.createLinearGradient(px, py, px, py + ph);
+      grad.addColorStop(0, '#db2777');
+      grad.addColorStop(1, '#9d174d');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.roundRect(px, py, pw, ph, 6);
+      ctx.fill();
+
+      // Platform shine
+      ctx.fillStyle = 'rgba(255,255,255,0.2)';
+      ctx.beginPath();
+      ctx.roundRect(px + 4, py + 2, pw - 8, 4, 3);
+      ctx.fill();
+
+      // Stage lights underneath
+      const lightColours = ['#ff6b6b', '#ffa94d', '#ffe066', '#f472b6', '#c084fc'];
+      for (let i = 0; i < 5; i++) {
+        ctx.fillStyle = lightColours[i];
+        ctx.shadowColor = lightColours[i];
+        ctx.shadowBlur = 8;
+        ctx.beginPath();
+        ctx.arc(px + 8 + i * (pw - 16) / 4, py + ph + 6, 3, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Stars around platform
+      ctx.font = '12px serif';
+      ctx.textAlign = 'center';
+      ctx.shadowBlur = 0;
+      ctx.fillText('✨', px - 10, py + 4);
+      ctx.fillText('✨', px + pw + 10, py + 4);
+
+      ctx.shadowBlur = 0;
+      ctx.textAlign = 'left';
+    }
+
+    function drawBackground() {
+      const grad = ctx.createLinearGradient(0, 0, 0, H);
+      grad.addColorStop(0, '#1a0011');
+      grad.addColorStop(1, '#2d0018');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, W, H);
+
+      // Sparkles
+      sparkles.forEach(s => {
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(251,207,232,${s.opacity})`;
+        ctx.fill();
+      });
+    }
+
+    function drawPipes() {
+      pipes.forEach(pipe => {
+        const px = pipe.x, topH = pipe.topH, botY = topH + GAP;
+
+        // Top pipe body
+        const topGrad = ctx.createLinearGradient(px, 0, px + PIPE_W, 0);
+        topGrad.addColorStop(0, '#9d174d');
+        topGrad.addColorStop(0.4, '#db2777');
+        topGrad.addColorStop(1, '#be185d');
+        ctx.fillStyle = topGrad;
+        ctx.beginPath();
+        ctx.roundRect(px + 4, 0, PIPE_W - 8, topH - 12, [0, 0, 4, 4]);
+        ctx.fill();
+
+        // Top pipe cap
+        ctx.fillStyle = '#ec4899';
+        ctx.beginPath();
+        ctx.roundRect(px, topH - 18, PIPE_W, 18, 6);
+        ctx.fill();
+        // Top pipe cap shine
+        ctx.fillStyle = 'rgba(255,255,255,0.15)';
+        ctx.beginPath();
+        ctx.roundRect(px + 4, topH - 16, 10, 14, 4);
+        ctx.fill();
+
+        // Bottom pipe cap
+        ctx.fillStyle = '#ec4899';
+        ctx.beginPath();
+        ctx.roundRect(px, botY, PIPE_W, 18, 6);
+        ctx.fill();
+        // Bottom pipe cap shine
+        ctx.fillStyle = 'rgba(255,255,255,0.15)';
+        ctx.beginPath();
+        ctx.roundRect(px + 4, botY + 2, 10, 14, 4);
+        ctx.fill();
+
+        // Bottom pipe body
+        ctx.fillStyle = topGrad;
+        ctx.beginPath();
+        ctx.roundRect(px + 4, botY + 18, PIPE_W - 8, H - botY - 18, [4, 4, 0, 0]);
+        ctx.fill();
+
+        // Emoji obstacle in the gap centre
+        ctx.font = '26px serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(pipe.type.emoji, px + PIPE_W / 2, topH + GAP / 2 + 10);
+
+        // Pipe shine lines
+        ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(px + 10, 0); ctx.lineTo(px + 10, topH - 18);
+        ctx.moveTo(px + 10, botY + 18); ctx.lineTo(px + 10, H);
+        ctx.stroke();
+      });
+      ctx.textAlign = 'left';
+    }
+
+    function drawYoonchae() {
+      ctx.save();
+      const cx = yoon.x + yoon.w / 2, cy = yoon.y + yoon.h / 2;
+      ctx.translate(cx, cy);
+      ctx.rotate((yoon.rotation * Math.PI) / 180);
+      ctx.translate(-cx, -cy);
+
+      const x = yoon.x, y = yoon.y, w = yoon.w, h = yoon.h;
+
+      // Body
+      const bodyGrad = ctx.createLinearGradient(x, y, x, y + h);
+      bodyGrad.addColorStop(0, '#fbcfe8');
+      bodyGrad.addColorStop(1, '#f9a8d4');
+      ctx.fillStyle = bodyGrad;
+      ctx.beginPath();
+      ctx.roundRect(x + 4, y + 18, w - 8, h - 18, 10);
+      ctx.fill();
+
+      // Outfit detail
+      ctx.fillStyle = '#f472b6';
+      ctx.beginPath();
+      ctx.roundRect(x + 8, y + 22, w - 16, 10, 4);
+      ctx.fill();
+
+      // Head
+      ctx.fillStyle = '#fde4f5';
+      ctx.beginPath();
+      ctx.arc(x + w / 2, y + 14, 15, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Hair (dark, flowing)
+      ctx.fillStyle = '#2d1008';
+      ctx.beginPath();
+      ctx.arc(x + w / 2, y + 8, 14, Math.PI, 0);
+      ctx.fill();
+      // Hair sides
+      ctx.beginPath();
+      ctx.ellipse(x + w / 2 - 13, y + 14, 5, 10, -0.3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.ellipse(x + w / 2 + 13, y + 14, 5, 10, 0.3, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Eyes
+      ctx.fillStyle = '#1a0a0a';
+      ctx.beginPath();
+      ctx.ellipse(x + w / 2 - 5, y + 13, 3, 3.5, 0, 0, Math.PI * 2);
+      ctx.ellipse(x + w / 2 + 5, y + 13, 3, 3.5, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Eye shine
+      ctx.fillStyle = 'white';
+      ctx.beginPath();
+      ctx.arc(x + w / 2 - 4, y + 11, 1.2, 0, Math.PI * 2);
+      ctx.arc(x + w / 2 + 6, y + 11, 1.2, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Smile
+      ctx.strokeStyle = '#be185d';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(x + w / 2, y + 17, 4, 0.2, Math.PI - 0.2);
+      ctx.stroke();
+
+      // Arms (flapping animation)
+      const armAngle = yoon.frame === 1 ? -0.4 : yoon.frame === 2 ? 0.3 : 0;
+      ctx.fillStyle = '#fbcfe8';
+      ctx.save();
+      ctx.translate(x + 6, y + 24);
+      ctx.rotate(armAngle - 0.3);
+      ctx.fillRect(-4, 0, 8, 16);
+      ctx.restore();
+      ctx.save();
+      ctx.translate(x + w - 6, y + 24);
+      ctx.rotate(-armAngle + 0.3);
+      ctx.fillRect(-4, 0, 8, 16);
+      ctx.restore();
+
+      // Legs
+      ctx.fillStyle = '#fce7f3';
+      ctx.fillRect(x + 10, y + h - 14, 9, 14);
+      ctx.fillRect(x + w - 19, y + h - 14, 9, 14);
+
+      // Music note sparkle above head (when flapping)
+      if (yoon.vy < -3) {
+        ctx.font = '14px serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('🎵', x + w / 2, y - 5);
+      }
+
+      // Name tag
+      ctx.fillStyle = 'rgba(0,0,0,0.55)';
+      ctx.beginPath();
+      ctx.roundRect(x - 2, y - 18, w + 4, 14, 4);
+      ctx.fill();
+      ctx.fillStyle = '#fbcfe8';
+      ctx.font = 'bold 9px Nunito';
+      ctx.textAlign = 'center';
+      ctx.fillText('YOONCHAE', x + w / 2, y - 7);
+
+      ctx.restore();
+      ctx.textAlign = 'left';
+    }
+
+    function drawParticles() {
+      particles.forEach(p => {
+        ctx.globalAlpha = p.life;
+        ctx.fillStyle = p.colour;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      ctx.globalAlpha = 1;
+    }
+
+    function drawScreen(title, line1, line2) {
+      ctx.fillStyle = 'rgba(0,0,0,0.7)';
+      ctx.fillRect(0, 0, W, H);
+
+      ctx.fillStyle = '#fbcfe8';
+      ctx.font = 'bold 28px Fredoka One';
+      ctx.textAlign = 'center';
+      ctx.fillText(title, W / 2, H / 2 - 36);
+
+      ctx.font = 'bold 17px Nunito';
+      ctx.fillStyle = '#f9a8d4';
+      ctx.fillText(line1, W / 2, H / 2 + 2);
+
+      if (line2) {
+        const lines = line2.split('\n');
+        lines.forEach((l, i) => {
+          ctx.font = 'bold 14px Nunito';
+          ctx.fillStyle = '#fbcfe8';
+          ctx.fillText(l, W / 2, H / 2 + 28 + i * 22);
+        });
+      }
+      ctx.textAlign = 'left';
+    }
+
+    makeSparkles();
+    frameId = requestAnimationFrame(loop);
+  </script>
+</body>
+
+</html>

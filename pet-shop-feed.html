@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pet Shop Feed!</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Fredoka+One&display=swap"
+    rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      min-height: 100vh;
+      background: #0d0020;
+      background-image:
+        radial-gradient(ellipse at 15% 20%, #1a0035 0%, transparent 45%),
+        radial-gradient(ellipse at 85% 80%, #001528 0%, transparent 45%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 16px 48px;
+      color: white;
+      user-select: none;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 12px;
+      animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
+
+    .title {
+      font-family: 'Fredoka One', cursive;
+      font-size: clamp(1.8rem, 6vw, 2.8rem);
+      background: linear-gradient(135deg, #ff6b6b, #ffa94d, #ffe066, #69db7c, #4dabf7, #cc5de8, #f783ac);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.2));
+    }
+
+    .subtitle {
+      font-size: 0.85rem;
+      color: #c084fc;
+      font-weight: 700;
+      margin-top: 2px;
+    }
+
+    .stats-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .stat-pill {
+      background: rgba(120, 40, 200, 0.25);
+      border: 1.5px solid rgba(192, 132, 252, 0.4);
+      border-radius: 99px;
+      padding: 5px 16px;
+      font-size: 13px;
+      font-weight: 800;
+      color: #e9d5ff;
+    }
+
+    .stat-pill span {
+      color: #c084fc;
+      font-weight: 900;
+    }
+
+    /* Timer bar */
+    .timer-wrap {
+      width: 100%;
+      max-width: 520px;
+      height: 12px;
+      background: rgba(120, 40, 200, 0.2);
+      border-radius: 99px;
+      overflow: hidden;
+      margin-bottom: 16px;
+      border: 1px solid rgba(192, 132, 252, 0.3);
+    }
+
+    .timer-fill {
+      height: 100%;
+      border-radius: 99px;
+      background: linear-gradient(90deg, #ff6b6b, #ffa94d, #ffe066, #69db7c, #4dabf7, #cc5de8);
+      transition: width 0.1s linear;
+    }
+
+    /* Animal card */
+    .animal-card {
+      background: rgba(255, 255, 255, 0.06);
+      border: 2px solid rgba(192, 132, 252, 0.35);
+      border-radius: 24px;
+      padding: 20px 24px 16px;
+      width: 100%;
+      max-width: 520px;
+      text-align: center;
+      margin-bottom: 16px;
+      animation: popIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
+
+    .animal-emoji {
+      font-size: 5rem;
+      line-height: 1;
+      margin-bottom: 8px;
+      display: block;
+      filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+    }
+
+    .animal-name {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.5rem;
+      color: #e9d5ff;
+      margin-bottom: 4px;
+    }
+
+    .animal-hint {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #a78bfa;
+      font-style: italic;
+    }
+
+    /* Food choices */
+    .food-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      width: 100%;
+      max-width: 520px;
+      margin-bottom: 14px;
+    }
+
+    .food-btn {
+      background: rgba(255, 255, 255, 0.07);
+      border: 2px solid rgba(192, 132, 252, 0.3);
+      border-radius: 16px;
+      padding: 14px 10px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 2rem;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      transition: transform 0.13s, background 0.15s, border-color 0.15s;
+      color: white;
+    }
+
+    .food-btn span {
+      font-size: 0.8rem;
+      font-weight: 800;
+      color: #d8b4fe;
+    }
+
+    .food-btn:hover {
+      transform: translateY(-3px) scale(1.04);
+      background: rgba(255, 255, 255, 0.13);
+      border-color: rgba(192, 132, 252, 0.6);
+    }
+
+    .food-btn:active {
+      transform: scale(0.96);
+    }
+
+    .food-btn.correct {
+      background: rgba(74, 222, 128, 0.2) !important;
+      border-color: #4ade80 !important;
+      animation: correctPop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
+
+    .food-btn.wrong {
+      background: rgba(248, 113, 113, 0.2) !important;
+      border-color: #f87171 !important;
+      animation: shake 0.35s ease both;
+    }
+
+    .food-btn:disabled {
+      cursor: default;
+    }
+
+    .msg-bar {
+      width: 100%;
+      max-width: 520px;
+      font-size: 14px;
+      font-weight: 800;
+      color: #e9d5ff;
+      text-align: center;
+      background: rgba(120, 40, 200, 0.2);
+      border-radius: 10px;
+      padding: 7px 16px;
+      border: 1px solid rgba(192, 132, 252, 0.3);
+      margin-bottom: 12px;
+      min-height: 36px;
+    }
+
+    .msg-bar.good {
+      color: #4ade80;
+      background: rgba(74, 222, 128, 0.1);
+    }
+
+    .msg-bar.bad {
+      color: #f87171;
+      background: rgba(248, 113, 113, 0.1);
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .action-btn {
+      background: linear-gradient(135deg, #7c3aed, #a855f7);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 11px 26px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 15px;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(124, 58, 237, 0.45);
+      transition: transform 0.13s;
+    }
+
+    .action-btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .action-btn:active {
+      transform: scale(0.97);
+    }
+
+    /* Overlays */
+    .overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 14px;
+      z-index: 50;
+      text-align: center;
+      padding: 24px;
+    }
+
+    .overlay.show {
+      display: flex;
+    }
+
+    .overlay-title {
+      font-family: 'Fredoka One', cursive;
+      font-size: 2.2rem;
+      background: linear-gradient(135deg, #ff6b6b, #ffa94d, #ffe066, #69db7c, #4dabf7, #cc5de8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .overlay-sub {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #d8b4fe;
+      line-height: 1.7;
+    }
+
+    .overlay-btn {
+      background: linear-gradient(135deg, #7c3aed, #a855f7);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 12px 28px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 15px;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(124, 58, 237, 0.4);
+    }
+
+    .rainbow-strip {
+      width: 100%;
+      max-width: 520px;
+      height: 4px;
+      background: linear-gradient(90deg, #ff6b6b, #ffa94d, #ffe066, #69db7c, #4dabf7, #cc5de8, #f783ac);
+      border-radius: 99px;
+      margin-bottom: 14px;
+      opacity: 0.6;
+    }
+
+    /* Back button */
+    .back-btn {
+      position: fixed;
+      left: 12px;
+      top: 12px;
+      background: rgba(255, 255, 255, 0.06);
+      color: #e9d5ff;
+      padding: 8px 12px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: 800;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      z-index: 220;
+    }
+
+    .back-btn:hover {
+      transform: translateY(-2px);
+    }
+
+    @keyframes popIn {
+      from {
+        opacity: 0;
+        transform: scale(0.8);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    @keyframes correctPop {
+      0% {
+        transform: scale(1);
+      }
+
+      50% {
+        transform: scale(1.08);
+      }
+
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    @keyframes shake {
+
+      0%,
+      100% {
+        transform: translateX(0);
+      }
+
+      25% {
+        transform: translateX(-6px);
+      }
+
+      75% {
+        transform: translateX(6px);
+      }
+    }
+
+    @media (max-width: 400px) {
+      .food-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <div class="title">Pet Shop Feed! 🐾</div>
+    <div class="subtitle">Feed the right food to each animal before time runs out!</div>
+  </header>
+
+  <a href="index.html" class="back-btn" aria-label="Back to index">← Back</a>
+
+  <div class="stats-row">
+    <div class="stat-pill">Score: <span id="score">0</span></div>
+    <div class="stat-pill">Best: <span id="best">0</span></div>
+    <div class="stat-pill">Lives: <span id="lives">❤️❤️❤️</span></div>
+    <div class="stat-pill">Animal: <span id="animal-num">1</span> / 10</div>
+  </div>
+
+  <div class="timer-wrap">
+    <div class="timer-fill" id="timer-fill" style="width:100%"></div>
+  </div>
+  <div class="rainbow-strip"></div>
+
+  <div class="animal-card" id="animal-card">
+    <span class="animal-emoji" id="animal-emoji">🐱</span>
+    <div class="animal-name" id="animal-name">Loading...</div>
+    <div class="animal-hint" id="animal-hint"></div>
+  </div>
+
+  <div class="food-grid" id="food-grid"></div>
+  <div class="msg-bar" id="msg-bar">What does this animal like to eat?</div>
+
+  <div class="btn-row">
+    <button class="action-btn" onclick="startGame()">Restart</button>
+  </div>
+
+  <!-- Start overlay -->
+  <div class="overlay show" id="start-overlay">
+    <div class="overlay-title">Pet Shop Feed! 🐾</div>
+    <div class="overlay-sub">An animal appears — pick the right food<br>before the timer runs out!<br>3 wrong answers
+      and it's game over! 🌈</div>
+    <button class="overlay-btn" onclick="startGame()">Let's go! 🐾</button>
+  </div>
+
+  <!-- End overlay -->
+  <div class="overlay" id="end-overlay">
+    <div class="overlay-title" id="end-title"></div>
+    <div style="font-size:3rem" id="end-stars"></div>
+    <div class="overlay-sub" id="end-sub"></div>
+    <button class="overlay-btn" onclick="startGame()">Play again! 🌈</button>
+  </div>
+
+  <script>
+    const animals = [
+      { emoji: '🐱', name: 'Cat', hint: '"Meow! I love..."', correct: '🐟', food: ['🐟', '🥕', '🍌', '🌾'] },
+      { emoji: '🐶', name: 'Dog', hint: '"Woof! My favourite is..."', correct: '🦴', food: ['🦴', '🍎', '🌿', '🐠'] },
+      { emoji: '🐰', name: 'Rabbit', hint: '"I love crunchy..."', correct: '🥕', food: ['🥕', '🍖', '🐟', '🧀'] },
+      { emoji: '🐹', name: 'Hamster', hint: '"I love to munch..."', correct: '🌾', food: ['🌾', '🍕', '🦴', '🐡'] },
+      { emoji: '🐦', name: 'Parrot', hint: '"Polly wants a..."', correct: '🌰', food: ['🌰', '🦴', '🥩', '🐟'] },
+      { emoji: '🐢', name: 'Tortoise', hint: '"Slow and steady, I like..."', correct: '🥬', food: ['🥬', '🍖', '🐟', '🌾'] },
+      { emoji: '🐠', name: 'Fish', hint: '"Blub blub! I eat..."', correct: '🦐', food: ['🦐', '🥕', '🌰', '🦴'] },
+      { emoji: '🦜', name: 'Budgie', hint: '"Tweet! I snack on..."', correct: '🌻', food: ['🌻', '🍖', '🦴', '🧀'] },
+      { emoji: '🐍', name: 'Snake', hint: '"Ssss... I eat..."', correct: '🐭', food: ['🐭', '🥕', '🌰', '🥬'] },
+      { emoji: '🦔', name: 'Hedgehog', hint: '"I love wiggly..."', correct: '🪱', food: ['🪱', '🌾', '🍎', '🦴'] },
+      { emoji: '🐇', name: 'Bunny', hint: '"Hop hop! Give me..."', correct: '🥦', food: ['🥦', '🍖', '🐟', '🌰'] },
+      { emoji: '🦎', name: 'Lizard', hint: '"I scuttle after..."', correct: '🦗', food: ['🦗', '🥕', '🦴', '🌾'] },
+      { emoji: '🐈', name: 'Kitten', hint: '"Purr... I love..."', correct: '🥛', food: ['🥛', '🦴', '🌾', '🥕'] },
+      { emoji: '🦁', name: 'Lion Cub', hint: '"Roar! I want some..."', correct: '🥩', food: ['🥩', '🥕', '🌰', '🌾'] },
+      { emoji: '🐨', name: 'Koala', hint: '"I only eat..."', correct: '🌿', food: ['🌿', '🦴', '🐟', '🧀'] },
+      { emoji: '🐼', name: 'Panda', hint: '"I munch on..."', correct: '🎋', food: ['🎋', '🍖', '🐟', '🦴'] },
+      { emoji: '🐸', name: 'Frog', hint: '"Ribbit! I catch..."', correct: '🦟', food: ['🦟', '🥕', '🌾', '🍎'] },
+      { emoji: '🦊', name: 'Fox', hint: '"Sneaky me loves..."', correct: '🍗', food: ['🍗', '🥬', '🌰', '🥛'] },
+      { emoji: '🐧', name: 'Penguin', hint: '"Waddle waddle! I love..."', correct: '🐡', food: ['🐡', '🥕', '🌾', '🦴'] },
+      { emoji: '🐮', name: 'Cow', hint: '"Moo! I graze on..."', correct: '🌾', food: ['🌾', '🍖', '🐟', '🧀'] },
+    ];
+
+    const TOTAL_ROUNDS = 10;
+    const TIME_PER_ROUND = 6000; // ms
+
+    let score = 0, best = 0, lives = 3, round = 0;
+    let gameActive = false, answered = false;
+    let timerStart = 0, timerInterval = null, timerDuration = TIME_PER_ROUND;
+    let animalOrder = [];
+
+    function shuffle(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function startGame() {
+      score = 0; lives = 3; round = 0; answered = false;
+      animalOrder = shuffle([...Array(animals.length).keys()]).slice(0, TOTAL_ROUNDS);
+      document.getElementById('score').textContent = 0;
+      document.getElementById('best').textContent = best;
+      document.getElementById('start-overlay').classList.remove('show');
+      document.getElementById('end-overlay').classList.remove('show');
+      updateHUD();
+      gameActive = true;
+      loadRound();
+    }
+
+    function loadRound() {
+      answered = false;
+      clearInterval(timerInterval);
+
+      const animal = animals[animalOrder[round]];
+      document.getElementById('animal-emoji').textContent = animal.emoji;
+      document.getElementById('animal-name').textContent = animal.name;
+      document.getElementById('animal-hint').textContent = animal.hint;
+      document.getElementById('animal-num').textContent = round + 1;
+      document.getElementById('msg-bar').textContent = 'What does this animal like to eat?';
+      document.getElementById('msg-bar').className = 'msg-bar';
+
+      // Animate card
+      const card = document.getElementById('animal-card');
+      card.style.animation = 'none';
+      card.offsetHeight;
+      card.style.animation = 'popIn 0.35s cubic-bezier(0.34,1.56,0.64,1) both';
+
+      // Build food buttons - shuffle the food options
+      const foods = shuffle(animal.food);
+      const grid = document.getElementById('food-grid');
+      grid.innerHTML = '';
+      foods.forEach(f => {
+        const btn = document.createElement('button');
+        btn.className = 'food-btn';
+        btn.innerHTML = `${f}<span>${getFoodName(f)}</span>`;
+        btn.onclick = () => selectFood(f, animal.correct, btn, foods.map((_, i) => grid.children[i]));
+        grid.appendChild(btn);
+      });
+
+      // Start timer
+      timerStart = Date.now();
+      timerDuration = Math.max(3500, TIME_PER_ROUND - round * 200); // gets slightly harder
+      updateTimer();
+      timerInterval = setInterval(() => {
+        if (!gameActive || answered) return;
+        const elapsed = Date.now() - timerStart;
+        const pct = Math.max(0, 1 - elapsed / timerDuration);
+        document.getElementById('timer-fill').style.width = (pct * 100) + '%';
+        if (pct <= 0) {
+          clearInterval(timerInterval);
+          timeOut();
+        }
+      }, 50);
+    }
+
+    function updateTimer() {
+      document.getElementById('timer-fill').style.width = '100%';
+    }
+
+    function getFoodName(emoji) {
+      const names = {
+        '🐟': 'Fish', '🦴': 'Bone', '🥕': 'Carrot', '🌾': 'Seeds', '🍌': 'Banana',
+        '🍎': 'Apple', '🌿': 'Leaves', '🐠': 'Fish', '🥩': 'Meat', '🥬': 'Lettuce',
+        '🍖': 'Meat', '🦐': 'Shrimp', '🌰': 'Nuts', '🌻': 'Sunflower', '🐭': 'Mouse',
+        '🪱': 'Worm', '🥦': 'Broccoli', '🦗': 'Cricket', '🥛': 'Milk', '🎋': 'Bamboo',
+        '🦟': 'Mosquito', '🍗': 'Chicken', '🐡': 'Pufferfish', '🧀': 'Cheese', '🐢': 'Turtle'
+      };
+      return names[emoji] || emoji;
+    }
+
+    function selectFood(chosen, correct, btn, allBtns) {
+      if (answered || !gameActive) return;
+      answered = true;
+      clearInterval(timerInterval);
+
+      // Disable all buttons
+      document.querySelectorAll('.food-btn').forEach(b => b.disabled = true);
+
+      // Show correct answer
+      document.querySelectorAll('.food-btn').forEach(b => {
+        if (b.textContent.startsWith(correct)) b.classList.add('correct');
+      });
+
+      const msg = document.getElementById('msg-bar');
+      if (chosen === correct) {
+        score += 10;
+        if (score > best) best = score;
+        document.getElementById('score').textContent = score;
+        document.getElementById('best').textContent = best;
+        msg.textContent = ['Yummy! Correct! 🌈', 'Perfect! 🐾', 'Well done! ⭐', 'Spot on! 💚'][Math.floor(Math.random() * 4)];
+        msg.className = 'msg-bar good';
+      } else {
+        btn.classList.add('wrong');
+        lives = Math.max(0, lives - 1);
+        updateHUD();
+        msg.textContent = `Oops! ${animals[animalOrder[round]].name}s eat ${getFoodName(correct)} ${correct}!`;
+        msg.className = 'msg-bar bad';
+        if (lives <= 0) { setTimeout(showEnd, 1200); return; }
+      }
+
+      round++;
+      if (round >= TOTAL_ROUNDS) { setTimeout(showEnd, 1000); return; }
+      setTimeout(loadRound, 1200);
+    }
+
+    function timeOut() {
+      if (answered || !gameActive) return;
+      answered = true;
+      lives = Math.max(0, lives - 1);
+      updateHUD();
+      const correct = animals[animalOrder[round]].correct;
+      document.querySelectorAll('.food-btn').forEach(b => {
+        b.disabled = true;
+        if (b.textContent.startsWith(correct)) b.classList.add('correct');
+      });
+      const msg = document.getElementById('msg-bar');
+      msg.textContent = `Too slow! ${animals[animalOrder[round]].name}s eat ${getFoodName(correct)} ${correct}!`;
+      msg.className = 'msg-bar bad';
+      if (lives <= 0) { setTimeout(showEnd, 1200); return; }
+      round++;
+      if (round >= TOTAL_ROUNDS) { setTimeout(showEnd, 1000); return; }
+      setTimeout(loadRound, 1400);
+    }
+
+    function showEnd() {
+      gameActive = false;
+      clearInterval(timerInterval);
+      const pct = score / (TOTAL_ROUNDS * 10);
+      const stars = pct >= 0.9 ? '⭐⭐⭐' : pct >= 0.6 ? '⭐⭐' : '⭐';
+      const title = score >= 90 ? 'Amazing! 🏆' : score >= 60 ? 'Well done! 🎉' : round >= TOTAL_ROUNDS ? 'Good try! 💪' : 'Game Over! 💔';
+      document.getElementById('end-title').textContent = title;
+      document.getElementById('end-stars').textContent = stars;
+      document.getElementById('end-sub').textContent =
+        `You scored ${score} out of ${TOTAL_ROUNDS * 10}!\n` +
+        (score >= 90 ? 'You know exactly what every animal loves!' :
+          score >= 60 ? 'Great job — you really know your animals!' :
+            'Keep practising and try again!');
+      document.getElementById('end-overlay').classList.add('show');
+    }
+
+    function updateHUD() {
+      const h = ['💔', '❤️', '❤️❤️', '❤️❤️❤️'];
+      document.getElementById('lives').textContent = h[lives] || '💔';
+    }
+  </script>
+</body>
+
+</html>
